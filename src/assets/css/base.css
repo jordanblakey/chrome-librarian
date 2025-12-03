@@ -6,8 +6,12 @@
 }
 
 .popup-page {
+  width: 500px;
   h1 {
     background: green;
     color: white;
+  }
+  pre {
+    margin: 0;
   }
 }
