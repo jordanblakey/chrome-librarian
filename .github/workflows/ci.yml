@@ -1,0 +1,29 @@
+name: Continuous Integration
+
+on:
+  push
+
+permissions:
+  contents: read
+
+jobs:
+  chrome-librarian:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run Unit Tests
+        run: npm test

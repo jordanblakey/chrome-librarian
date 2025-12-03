@@ -1,0 +1,13 @@
+.options-page {
+  h1 {
+    background: blue;
+    color: white;
+  }
+}
+
+.popup-page {
+  h1 {
+    background: green;
+    color: white;
+  }
+}

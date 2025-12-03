@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "name": "librarian-extension",
+  "description": "A Chrome extension that organizes your bookmarks using Gemini Nano.",
+  "scripts": {
+    "test": "vitest run --silent",
+    "test:watch": "vitest",
+    "build": "ts-node ./scripts/build.ts",
+    "test:browser": "vitest --config=vitest.browser.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/adm-zip": "^0.5.7",
+    "@types/chrome": "^0.1.32",
+    "@types/node": "^24.10.1",
+    "@vitest/browser-preview": "^4.0.15",
+    "adm-zip": "^0.5.16",
+    "ora": "^9.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  },
+  "type": "module"
+}
