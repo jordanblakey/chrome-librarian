@@ -5,11 +5,9 @@
   "scripts": {
     "test": "vitest run --silent",
     "test:watch": "vitest",
-    "build": "ts-node ./scripts/build.ts",
-    "test:browser": "vitest --config=vitest.browser.config.ts"
+    "build": "ts-node ./scripts/build.ts"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
     "@types/adm-zip": "^0.5.7",
     "@types/chrome": "^0.1.32",
     "@types/node": "^24.10.1",

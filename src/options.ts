@@ -7,11 +7,6 @@ function optionsMain() {
 
 typeof window !== "undefined" && optionsMain();
 
-interface promptMessage {
-  payload: string;
-  type: string;
-}
-
 function initPromptForm() {
   const submitButton = document.getElementById(
     "submit-button",
@@ -21,15 +16,21 @@ function initPromptForm() {
   ) as HTMLTextAreaElement;
 
   submitButton?.addEventListener("click", () => {
-    const message: promptMessage = {
+    const message: RuntimeMessage = {
       payload: promptInput.value,
       type: "prompt",
     };
-    chrome.runtime.sendMessage(message, updateOutputDiv);
+    chrome.runtime.sendMessage(message, handleResponse);
   });
 }
 
-function updateOutputDiv(response: string) {
+function handleResponse(response: RuntimeMessage) {
+  console.debug(`handleResponse: ${response}`);
   const outputDiv = document.getElementById("output-div") as HTMLDivElement;
-  outputDiv.innerHTML = JSON.stringify(response);
+  if (response.status === "success") {
+    outputDiv.innerHTML = JSON.stringify(response);
+  } else if (response.status === "failure") {
+    outputDiv.innerHTML =
+      "Error: Failed to get a response from the language model.";
+  }
 }

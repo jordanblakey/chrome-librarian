@@ -1,34 +1,61 @@
 console.debug("background script loaded...");
 
+const backgroundState: BackgroundState = {};
+
 async function backgroundMain() {
   console.debug("background main running...");
   const { session, controller } = await createPromptAPISession();
+  backgroundState.session = session;
+  backgroundState.sessionController = controller;
 
-  // Listen for messages from popup and options pages.
-  chrome.runtime.onMessage.addListener(
-    (request: any, sender: any, sendResponse: CallableFunction) => {
-      console.debug(request);
-      console.debug(sender);
-      console.debug(sendResponse);
-      onMessage(session, request, sendResponse);
-      return true;
-    },
-  );
+  chrome.runtime.onMessage.addListener(onMessageHandler);
 }
 
 backgroundMain();
 
-async function onMessage(session: any, request: any, sendResponse: any) {
-  if (request.type === "prompt") {
-    console.debug("Received prompt:", request.payload);
-    const response = await session.prompt(request.payload, {
+function onMessageHandler(
+  message: RuntimeMessage,
+  sender: chrome.runtime.MessageSender,
+  sendResponse: (response?: RuntimeMessage) => void,
+) {
+  console.debug(message);
+  console.debug(sender);
+  console.debug(sendResponse);
+
+  if (message.type === "prompt") {
+    promptFromMessage(message).then((response) => {
+      console.log("promptFromMessage", response);
+      sendResponse(response);
+    });
+    return true;
+  } else {
+    sendResponse({
+      payload: "unsupported message type",
+      type: "response",
+      status: "failure",
+    });
+  }
+}
+
+async function promptFromMessage(
+  message: RuntimeMessage,
+): Promise<RuntimeMessage> {
+  if (backgroundState.session) {
+    console.debug("Received prompt:", message.payload);
+    const response = await backgroundState.session.prompt(message.payload, {
       responseConstraint: { type: "string" },
     });
-    console.debug(response);
-    sendResponse({
+    return {
+      payload: response,
+      type: "response",
       status: "success",
-      message: response,
-    });
+    };
+  } else {
+    return {
+      payload: "Language model session not initialized.",
+      type: "response",
+      status: "failure",
+    };
   }
 }
 
@@ -37,7 +64,7 @@ async function createPromptAPISession(
   topKMult: number = 1.0,
   languages: string[] = ["en"],
 ): Promise<{
-  session: any;
+  session: LanguageModel;
   controller: AbortController;
 }> {
   const availability: string = await (
@@ -49,16 +76,18 @@ async function createPromptAPISession(
 
   const params = await (globalThis as any).LanguageModel.params();
   const controller = new AbortController();
-  const session = await (globalThis as any).LanguageModel.create({
-    temperature: Math.max(params.defaultTemperature * tempMult, 2.0),
-    topK: params.defaultTopK * topKMult,
-    signal: controller.signal,
-    monitor(m: any) {
-      m.addEventListener("downloadprogress", (e: any) => {
-        console.debug(`downloading model: ${e.loaded * 100}%`);
-      });
+  const session: LanguageModel = await (globalThis as any).LanguageModel.create(
+    {
+      temperature: Math.max(params.defaultTemperature * tempMult, 2.0),
+      topK: params.defaultTopK * topKMult,
+      signal: controller.signal,
+      monitor(m: any) {
+        m.addEventListener("downloadprogress", (e: any) => {
+          console.debug(`downloading model: ${e.loaded * 100}%`);
+        });
+      },
     },
-  });
+  );
 
   return { session, controller };
 }
