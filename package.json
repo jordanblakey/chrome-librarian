@@ -13,7 +13,6 @@
     "@types/adm-zip": "^0.5.7",
     "@types/chrome": "^0.1.32",
     "@types/node": "^24.10.1",
-    "@vitest/browser-preview": "^4.0.15",
     "adm-zip": "^0.5.16",
     "ora": "^9.0.0",
     "ts-node": "^10.9.2",

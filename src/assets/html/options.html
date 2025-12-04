@@ -4,6 +4,24 @@
   </head>
   <body class="options-page">
     <h1>Chrome Librarian</h1>
+
+    <h2>On-Device Models</h2>
+    <ul>
+      <li>
+        Manage your on-device machine learning models: chrome://on-device-internals
+      </li>
+    </ul>
+
+    <h2>Prompt</h2>
+    <div class="input-group">
+      <label for="prompt-input">Prompt:</label>
+      <textarea name="prompt-input" id="prompt-input" placeholder="enter a prompt..."></textarea>
+      <button id="submit-button">Prompt</button>
+    </div>
+
+    <h2>Output</h2>
+    <div id="output-div"></div>
+
     <script src="../../options.js" type="module"></script>
   </body>
 </html>
