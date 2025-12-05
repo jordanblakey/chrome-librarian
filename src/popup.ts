@@ -5,6 +5,8 @@ async function main() {
   initializeEventListeners();
 }
 
+typeof window !== "undefined" && main();
+
 export function initializeEventListeners() {
   document.getElementById("options-link")?.addEventListener("click", () => {
     chrome.runtime.openOptionsPage();
@@ -55,5 +57,3 @@ export function formatRow(
   row = `<pre>${row}</pre>`;
   return row;
 }
-
-typeof window !== "undefined" && main();
