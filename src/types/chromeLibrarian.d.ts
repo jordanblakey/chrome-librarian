@@ -4,7 +4,8 @@ type BackgroundState = {
 };
 
 interface RuntimeMessage {
-  payload: string;
-  type: "prompt" | "response";
+  payload?: string;
+  type: "prompt" | "response" | "new-session";
   status?: "success" | "failure";
+  latencyMs?: number;
 }

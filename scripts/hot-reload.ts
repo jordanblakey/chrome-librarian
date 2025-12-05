@@ -6,16 +6,16 @@ function connect() {
     socket = new WebSocket(WS_URL);
 
     socket.onopen = () => {
-        console.log('[Hot Reload] Connected to dev server');
+        console.debug('[Hot Reload] Connected to dev server');
     };
 
     socket.onmessage = (event) => {
         const msg = event.data;
         if (msg === 'reload:full') {
-            console.log('[Hot Reload] Full extension reload...');
+            console.debug('[Hot Reload] Full extension reload...');
             chrome.runtime.reload();
         } else if (msg === 'reload:ui') {
-            console.log('[Hot Reload] UI reload...');
+            console.debug('[Hot Reload] UI reload...');
             if (typeof window !== 'undefined' && window.location) {
                 window.location.reload();
             }
@@ -23,12 +23,11 @@ function connect() {
     };
 
     socket.onclose = () => {
-        console.log('[Hot Reload] Disconnected. Retrying in 1s...');
-        setTimeout(connect, 1000);
+        console.debug('[Hot Reload] Disconnected.');
     };
 
     socket.onerror = (err) => {
-        console.error('[Hot Reload] Connection error:', err);
+        console.debug('[Hot Reload] Error:', JSON.stringify(err));
         socket.close();
     };
 }

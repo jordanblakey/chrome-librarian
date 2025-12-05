@@ -14,23 +14,37 @@ function initPromptForm() {
   const promptInput = document.getElementById(
     "prompt-input",
   ) as HTMLTextAreaElement;
+  const newSessionButton = document.getElementById(
+    "new-session-button",
+  ) as HTMLButtonElement;
 
-  submitButton?.addEventListener("click", () => {
-    const message: RuntimeMessage = {
-      payload: promptInput.value,
-      type: "prompt",
-    };
-    chrome.runtime.sendMessage(message, handleResponse);
+  submitButton?.addEventListener("click", () => handleSubmit(promptInput.value));
+  promptInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      submitButton?.focus();
+    }
+  });
+  newSessionButton?.addEventListener("click", () => newSession());
+}
+
+function newSession() {
+  const message: RuntimeMessage = {
+    type: "new-session",
+  };
+  chrome.runtime.sendMessage(message, (response: RuntimeMessage): void => {
+    const outputDiv = document.getElementById("output-div") as HTMLDivElement;
+    outputDiv.innerHTML = JSON.stringify(response, null, 2);
   });
 }
 
-function handleResponse(response: RuntimeMessage) {
-  console.debug(`handleResponse: ${response}`);
-  const outputDiv = document.getElementById("output-div") as HTMLDivElement;
-  if (response.status === "success") {
+function handleSubmit(prompt: string) {
+  const message: RuntimeMessage = {
+    payload: prompt,
+    type: "prompt",
+  };
+  chrome.runtime.sendMessage(message, (response: RuntimeMessage): void => {
+    const outputDiv = document.getElementById("output-div") as HTMLDivElement;
     outputDiv.innerHTML = JSON.stringify(response, null, 2);
-  } else if (response.status === "failure") {
-    outputDiv.innerHTML =
-      "Error: Failed to get a response from the language model.";
-  }
+  });
 }
+

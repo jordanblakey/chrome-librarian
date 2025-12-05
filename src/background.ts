@@ -18,17 +18,24 @@ function onMessageHandler(
   sender: chrome.runtime.MessageSender,
   sendResponse: (response?: RuntimeMessage) => void,
 ) {
-  console.debug(message);
-  console.debug(sender);
-  console.debug(sendResponse);
+  console.debug("onMessageHandler - message:", message);
+  // console.debug("onMessageHandler:", sender);
 
   if (message.type === "prompt") {
     promptFromMessage(message).then((response) => {
-      console.log("promptFromMessage", response);
+      console.debug("onMessageHandler - response:", response);
       sendResponse(response);
     });
     return true;
-  } else {
+  }
+  else if (message.type === "new-session") {
+    newSessionFromMessage(message).then((response) => {
+      console.debug("onMessageHandler - response:", response);
+      sendResponse(response);
+    });
+    return true;
+  }
+  else {
     sendResponse({
       payload: "unsupported message type",
       type: "response",
@@ -40,22 +47,40 @@ function onMessageHandler(
 async function promptFromMessage(
   message: RuntimeMessage,
 ): Promise<RuntimeMessage> {
+  console.debug("promptFromMessage:", message.payload);
   if (backgroundState.session) {
-    console.debug("Received prompt:", message.payload);
     const startTime = performance.now();
     const response = await backgroundState.session.prompt(message.payload, {
       responseConstraint: { type: "string" },
     });
-    const endTime = performance.now();
-    console.debug(`Prompt took ${Math.round(Math.round(endTime - startTime))}ms`);
     return {
       payload: response,
       type: "response",
       status: "success",
+      latencyMs: Math.round(performance.now() - startTime),
     };
   } else {
     return {
       payload: "Language model session not initialized.",
+      type: "response",
+      status: "failure",
+    };
+  }
+}
+
+async function newSessionFromMessage(message: RuntimeMessage): Promise<RuntimeMessage> {
+  try {
+    const { session, controller } = await createPromptAPISession();
+    backgroundState.session = session;
+    backgroundState.sessionController = controller;
+    return {
+      payload: "New session created.",
+      type: "response",
+      status: "success",
+    };
+  } catch (error) {
+    return {
+      payload: "Failed to create new session: " + JSON.stringify(error),
       type: "response",
       status: "failure",
     };
@@ -70,6 +95,8 @@ async function createPromptAPISession(
   session: LanguageModel;
   controller: AbortController;
 }> {
+  console.debug("LanguageModel session creation started...");
+  const startTime = performance.now();
   const availability: string = await (
     globalThis as any
   ).LanguageModel.availability({ languages: languages });
@@ -91,6 +118,7 @@ async function createPromptAPISession(
       },
     },
   );
+  console.debug("LanguageModel session created in", Math.round(performance.now() - startTime) + "ms");
 
   return { session, controller };
 }

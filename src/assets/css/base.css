@@ -3,6 +3,13 @@
     background: blue;
     color: white;
   }
+
+  #output-div {
+    pre {
+      margin: 0;
+      text-wrap: auto;
+    }
+  }
 }
 
 .popup-page {
@@ -11,9 +18,5 @@
   h1 {
     background: green;
     color: white;
-  }
-
-  pre {
-    margin: 0;
   }
 }

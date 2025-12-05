@@ -10,7 +10,7 @@ export function buildExtension(options: { dev?: boolean } = {}) {
 
   // Build unpacked extension
   fs.rmSync('dist', { recursive: true, force: true });
-  execSync('tsc --build tsconfig.json', { stdio: 'inherit' });
+  execSync('npx tsc --build tsconfig.json', { stdio: 'inherit' });
   fs.cpSync('manifest.json', 'dist/manifest.json');
   fs.cpSync('src/assets', 'dist/assets', { recursive: true });
 
