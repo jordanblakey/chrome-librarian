@@ -42,9 +42,12 @@ async function promptFromMessage(
 ): Promise<RuntimeMessage> {
   if (backgroundState.session) {
     console.debug("Received prompt:", message.payload);
+    const startTime = performance.now();
     const response = await backgroundState.session.prompt(message.payload, {
       responseConstraint: { type: "string" },
     });
+    const endTime = performance.now();
+    console.debug(`Prompt took ${Math.round(Math.round(endTime - startTime))}ms`);
     return {
       payload: response,
       type: "response",

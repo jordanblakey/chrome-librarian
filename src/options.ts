@@ -28,7 +28,7 @@ function handleResponse(response: RuntimeMessage) {
   console.debug(`handleResponse: ${response}`);
   const outputDiv = document.getElementById("output-div") as HTMLDivElement;
   if (response.status === "success") {
-    outputDiv.innerHTML = JSON.stringify(response);
+    outputDiv.innerHTML = JSON.stringify(response, null, 2);
   } else if (response.status === "failure") {
     outputDiv.innerHTML =
       "Error: Failed to get a response from the language model.";

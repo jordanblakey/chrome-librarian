@@ -5,17 +5,21 @@
   "scripts": {
     "test": "vitest run --silent",
     "test:watch": "vitest",
-    "build": "ts-node ./scripts/build.ts"
+    "build": "ts-node ./scripts/build.ts",
+    "dev": "ts-node ./scripts/dev.ts"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
     "@types/chrome": "^0.1.32",
     "@types/node": "^24.10.1",
+    "@types/ws": "^8.18.1",
     "adm-zip": "^0.5.16",
+    "chokidar": "^5.0.0",
     "ora": "^9.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.15",
+    "ws": "^8.18.3"
   },
   "type": "module"
 }
