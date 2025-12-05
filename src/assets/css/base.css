@@ -4,8 +4,14 @@
     color: white;
   }
 
-  #output-div {
-    pre {
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .output-group {
+    pre#output-div {
       margin: 0;
       text-wrap: auto;
     }
@@ -18,5 +24,15 @@
   h1 {
     background: green;
     color: white;
+  }
+
+  pre {
+    margin: 0;
+  }
+
+  #options-link {
+    cursor: pointer;
+    text-decoration: underline;
+    color: blue;
   }
 }

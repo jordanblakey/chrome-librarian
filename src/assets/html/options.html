@@ -8,22 +8,16 @@
 <body class="options-page">
   <h1>Chrome Librarian</h1>
 
-  <h2>On-Device Models</h2>
-  <ul>
-    <li>
-      Manage your on-device machine learning models: chrome://on-device-internals
-    </li>
-  </ul>
-
   <div class="input-group">
-    <label for="prompt-input">Prompt:</label>
-    <textarea name="prompt-input" id="prompt-input" placeholder="enter a prompt..."></textarea>
-    <button id="submit-button">Prompt</button>
-    <button id="new-session-button">New Session</button>
+    <textarea name="prompt-input" id="prompt-input" placeholder="prompt Gemini Nano..."></textarea>
+    <div class="button-row">
+      <button id="submit-button">Prompt</button>
+      <button id="new-session-button">New Session</button>
+    </div>
   </div>
 
   <div class="output-group">
-    <p>Output</p>
+    <p>Response</p>
     <pre id="output-div"></pre>
   </div>
 
