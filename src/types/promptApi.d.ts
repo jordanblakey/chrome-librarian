@@ -9,4 +9,5 @@ interface LanguageModel {
   prompt: CallableFunction;
   initialPrompts: Array<{ role: string; content: string }>;
   promptStreaming: CallableFunction;
+  measureInputUsage: CallableFunction;
 }

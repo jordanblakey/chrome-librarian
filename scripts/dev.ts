@@ -26,7 +26,7 @@ function broadcastReload(type: 'full' | 'ui') {
 
 // Initial build
 try {
-    buildExtension({ dev: true });
+    await buildExtension({ dev: true });
 } catch (e) {
     console.error('[Dev] Initial build failed:', e);
 }
@@ -40,10 +40,10 @@ const watcher = chokidar.watch(['src', 'manifest.json'], {
     interval: 100,
 });
 
-watcher.on('all', (event, path) => {
+watcher.on('all', async (event, path) => {
     console.log(`[Dev] Change detected (${event}): ${path}`);
     try {
-        buildExtension({ dev: true });
+        await buildExtension({ dev: true });
         console.log('[Dev] Rebuild successful, reloading extension...');
 
         // Determine reload type
@@ -57,7 +57,7 @@ watcher.on('all', (event, path) => {
 });
 
 function getReloadType(path: string): 'full' | 'ui' {
-    const systemFiles = ['background.mts', 'manifest.json'];
+    const systemFiles = ['background.mts', 'manifest.json', 'src/data/', 'src/utils/'];
     return systemFiles.some(file => path.includes(file)) ? 'full' : 'ui';
 }
 

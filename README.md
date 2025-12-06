@@ -2,14 +2,21 @@
 
 ## Documentation Links
 
+### Chrome APIs
 - <https://developer.chrome.com/docs/extensions/reference/manifest>
-- <https://developer.chrome.com/docs/ai/built-in-apis>
-- <https://developer.chrome.com/docs/ai/prompt-api>
 - <https://developer.chrome.com/docs/extensions/reference/api/bookmarks>
 - <https://developer.chrome.com/docs/extensions/reference/api/storage>
 - <https://developer.chrome.com/docs/extensions/reference/api/runtime>
 
-## Chrome URLs
+### Chrome APIs - Prompt API
+- <https://developer.chrome.com/docs/ai/built-in-apis>
+- <https://developer.chrome.com/docs/ai/prompt-api>
+- <https://developer.chrome.com/docs/ai/session-management>
+- <https://developer.chrome.com/docs/ai/session-management#clone_a_main_session>
+- <https://developer.chrome.com/docs/ai/session-management#restore_a_past_session>
+- <https://developer.chrome.com/docs/ai/prompt-api#terminate_a_session>
+
+### Chrome URLs
 
 - <chrome://version/>: View details about Chrome executable
 - <chrome://chrome-urls/>: List of Chrome URLs

@@ -4,9 +4,9 @@ import * as fs from 'fs';
 import ora from 'ora';
 import * as ts from 'typescript';
 
-export function buildExtension(options: { dev?: boolean } = {}) {
+export async function buildExtension(options: { dev?: boolean } = {}) {
   const startTime = Date.now();
-  const spinner = ora('Building extension...').start();
+  const spinner = ora('Building extension...\n').start();
 
   const buildPromise = new Promise<void>((resolve) => {
     // Build unpacked extension
@@ -26,11 +26,10 @@ export function buildExtension(options: { dev?: boolean } = {}) {
     resolve();
   });
 
-  buildPromise.then(() => {
-    spinner.succeed(`Build complete. ${((Date.now() - startTime) / 1000).toFixed(1)}s`);
-    console.log('📂 Unpacked extension: dist/');
-    console.log(`📦 Web Store Zip: chrome-librarian.zip`)
-  });
+  await buildPromise;
+  spinner.succeed(`Build complete. ${((Date.now() - startTime) / 1000).toFixed(1)}s`);
+  console.log('📂 Unpacked extension: dist/');
+  console.log(`📦 Web Store Zip: chrome-librarian.zip`)
 }
 
 function injectHotReload() {
@@ -54,4 +53,4 @@ function injectHotReload() {
 }
 
 // Only run if called directly
-import.meta.main && buildExtension();
+import.meta.main && await buildExtension();

@@ -6,6 +6,9 @@ feature: 2 stage process: 1. iteratively create tree from chunks of data, then 2
 
 # simple tasks
 feature: Bookmark backup and restore using storage API 
+clear input on submit
+fix width issue css
+toast messages on copy response
 
 # learn
 basic bookmark manipulation: flatten, sort, move, delete, rename, create folder, create bookmark

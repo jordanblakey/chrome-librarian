@@ -11,8 +11,13 @@
   <div class="input-group">
     <textarea name="prompt-input" id="prompt-input" placeholder="prompt Gemini Nano..."></textarea>
     <div class="button-row">
-      <button id="submit-button">Prompt</button>
+      <button id="prompt-button">Prompt</button>
+      <input type="checkbox" id="streaming-checkbox" checked>
+      <label for="streaming-checkbox">Streaming</label>
+      <button id="stop-response-button">Stop Response</button>
       <button id="copy-button">Copy Response</button>
+    </div>
+    <div class="button-row">
       <label for="new-session-type-select">Session Type:</label>
       <select id="new-session-type-select">
         <option value="prompt-text">Text Prompt</option>
