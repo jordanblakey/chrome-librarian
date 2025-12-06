@@ -9,8 +9,9 @@ type BackgroundState = {
 
 interface RuntimeMessage {
   payload?: string;
-  type: "prompt" | "response" | "new-session";
+  type: "prompt" | "response" | "new-session" | "session-stats";
   sessionType?: SessionType;
   status?: "success" | "failure";
   latencyMs?: number;
+  tokenUsage?: number;
 }

@@ -6,10 +6,9 @@ console.debug("background script loaded...");
 const backgroundState: BackgroundState = {};
 
 async function main() {
-  console.debug("background main running...");
   backgroundState.sessionType = "prompt-text";
   const initialPrompts = [{ role: "system", content: getSystemPrompt(backgroundState.sessionType) }];
-  const { session, controller } = await createPromptAPISession(1, 1, ["en"], initialPrompts);
+  const { session, controller } = await createLanguageModelSession(1, 1, ["en"], initialPrompts);
   backgroundState.session = session;
   backgroundState.sessionController = controller;
 
@@ -21,18 +20,18 @@ function onMessageHandler(
   sender: chrome.runtime.MessageSender,
   sendResponse: (response?: RuntimeMessage) => void,
 ) {
-  console.debug("onMessageHandler - message:", message);
+  console.debug("[onMessageHandler] message:", message);
 
   if (message.type === "prompt") {
     promptFromMessage(message).then((response) => {
-      console.debug("onMessageHandler - response:", response);
+      console.debug("[onMessageHandler] response:", response);
       sendResponse(response);
     });
     return true;
   }
   else if (message.type === "new-session") {
     newSessionFromMessage(message).then((response) => {
-      console.debug("onMessageHandler - response:", response);
+      console.debug("[onMessageHandler] response:", response);
       sendResponse(response);
     });
     return true;
@@ -49,19 +48,32 @@ function onMessageHandler(
 async function promptFromMessage(
   message: RuntimeMessage,
 ): Promise<RuntimeMessage> {
-  console.debug("promptFromMessage:", message.payload);
+  console.debug("[promptFromMessage] message.payload:", message.payload);
   if (backgroundState.session) {
     const startTime = performance.now();
+    const tokenStart = backgroundState.session.inputUsage;
 
     const schema = getResponseSchema(backgroundState.sessionType!);
     const response = await backgroundState.session.prompt(message.payload, {
       responseConstraint: schema,
     });
+    const tokenEnd = backgroundState.session.inputUsage;
+
+    chrome.runtime.sendMessage({
+      type: "session-stats",
+      payload: {
+        sessionType: backgroundState.sessionType,
+        inputUsage: backgroundState.session.inputUsage,
+        inputQuota: backgroundState.session.inputQuota,
+      }
+    });
+
     return {
       payload: response,
       type: "response",
       status: "success",
       latencyMs: Math.round(performance.now() - startTime),
+      tokenUsage: tokenEnd - tokenStart,
     };
   } else {
     return {
@@ -82,11 +94,12 @@ async function newSessionFromMessage(message: RuntimeMessage): Promise<RuntimeMe
   }
 
   try {
+    backgroundState.sessionController?.abort();
+    backgroundState.sessionType = message.sessionType;
     const initialPrompts = [{ role: "system", content: getSystemPrompt(message.sessionType) }];
-    const { session, controller } = await createPromptAPISession(1, 1, ["en"], initialPrompts);
+    const { session, controller } = await createLanguageModelSession(1, 1, ["en"], initialPrompts);
     backgroundState.session = session;
     backgroundState.sessionController = controller;
-    backgroundState.sessionType = message.sessionType;
     return {
       payload: "New session created.",
       sessionType: message.sessionType,
@@ -103,16 +116,13 @@ async function newSessionFromMessage(message: RuntimeMessage): Promise<RuntimeMe
   }
 }
 
-async function createPromptAPISession(
+async function createLanguageModelSession(
   tempMult: number = 1.0,
   topKMult: number = 1.0,
   languages: string[] = ["en"],
   initialPrompts: Array<{ role: string; content: string }> = [],
-): Promise<{
-  session: LanguageModel;
-  controller: AbortController;
-}> {
-  console.debug("LanguageModel session creation started...");
+): Promise<{ session: LanguageModel; controller: AbortController }> {
+  console.debug("[createLanguageModelSession] creation started...");
   const startTime = performance.now();
   const availability: string = await (
     globalThis as any
@@ -131,12 +141,12 @@ async function createPromptAPISession(
       signal: controller.signal,
       monitor(m: any) {
         m.addEventListener("downloadprogress", (e: any) => {
-          console.debug(`downloading model: ${e.loaded * 100}%`);
+          console.debug("[createLanguageModelSession] model download progress " + e.loaded * 100 + "%");
         });
       },
     },
   );
-  console.debug("LanguageModel session created in", Math.round(performance.now() - startTime) + "ms");
+  console.debug("[createLanguageModelSession] created in", Math.round(performance.now() - startTime) + "ms");
 
   return { session, controller };
 }

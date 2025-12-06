@@ -57,7 +57,7 @@ watcher.on('all', (event, path) => {
 });
 
 function getReloadType(path: string): 'full' | 'ui' {
-    const systemFiles = ['background.ts', 'manifest.json'];
+    const systemFiles = ['background.mts', 'manifest.json'];
     return systemFiles.some(file => path.includes(file)) ? 'full' : 'ui';
 }
 

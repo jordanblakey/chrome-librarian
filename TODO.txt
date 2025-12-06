@@ -6,8 +6,6 @@ feature: 2 stage process: 1. iteratively create tree from chunks of data, then 2
 
 # simple tasks
 feature: Bookmark backup and restore using storage API 
-feature: Session token counter indicator
-feature: Prompt token cost indicator
 
 # learn
 basic bookmark manipulation: flatten, sort, move, delete, rename, create folder, create bookmark

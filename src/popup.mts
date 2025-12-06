@@ -1,4 +1,4 @@
-console.log("popup script loaded...");
+console.debug("[popup] script loaded...");
 
 async function main() {
   await createBookmarksTree();
@@ -17,7 +17,6 @@ export async function createBookmarksTree() {
   const treeElement = document.createElement("p");
   const tree = await chrome.bookmarks.getTree();
   for (const node of walkBookmarks(tree)) {
-    console.debug(node);
     treeElement.innerHTML += formatRow(node[0], node[1]);
   }
   document.body.appendChild(treeElement);

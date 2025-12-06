@@ -18,14 +18,17 @@
         <option value="prompt-text">Text Prompt</option>
         <option value="prompt-generate-bookmarks-json">Generate Bookmarks JSON</option>
       </select>
-
       <button id="new-session-button">New Session</button>
+      <p><b>Session Stats:</b></p>
+      <pre id="session-stats-div"></pre>
     </div>
   </div>
 
   <div class="output-group">
     <p><b>Response:</b> <span id="response-status"></span></p>
     <pre id="output-div"></pre>
+    <p><b>Stats:</b> <span id="stats-status"></span></p>
+    <pre id="stats-div"></pre>
   </div>
 
   <script src="../../options.mjs" type="module"></script>

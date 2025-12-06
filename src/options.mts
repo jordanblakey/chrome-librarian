@@ -1,8 +1,8 @@
-console.debug("options script loaded...");
+console.debug("[options] script loaded...");
 
 function optionsMain() {
-  console.debug("options main called...");
   initPromptForm();
+  chrome.runtime.onMessage.addListener(onMessageHandler);
 }
 
 typeof window !== "undefined" && optionsMain();
@@ -34,10 +34,32 @@ function initPromptForm() {
   newSessionTypeSelect?.addEventListener("change", () => newSession(newSessionTypeSelect.value as SessionType));
   newSessionButton?.addEventListener("click", () => newSession(newSessionTypeSelect.value as SessionType));
   copyButton?.addEventListener("click", () => {
-    console.debug("copy button clicked...");
-    console.debug("outputDiv.innerHTML", outputDiv.innerHTML);
     navigator.clipboard.writeText(outputDiv.innerHTML)
   });
+}
+
+function onMessageHandler(
+  message: RuntimeMessage,
+  sender: chrome.runtime.MessageSender,
+  sendResponse: (response?: RuntimeMessage) => void,
+) {
+  console.debug("[onMessageHandler] message:", message);
+  if (message.type === "session-stats") {
+    handleSessionStats(message);
+    return true;
+  }
+  else {
+    sendResponse({
+      payload: "unsupported message type",
+      type: "response",
+      status: "failure",
+    });
+  }
+}
+
+function handleSessionStats(message: RuntimeMessage) {
+  const sessionStatsDiv = document.getElementById("session-stats-div") as HTMLDivElement;
+  sessionStatsDiv.innerHTML = JSON.stringify(message.payload, null, 2);
 }
 
 function newSession(sessionType: SessionType) {
@@ -46,8 +68,7 @@ function newSession(sessionType: SessionType) {
     sessionType: sessionType,
   };
   chrome.runtime.sendMessage(message, (response: RuntimeMessage): void => {
-    const outputDiv = document.getElementById("output-div") as HTMLDivElement;
-    outputDiv.innerHTML = JSON.stringify(response, null, 2);
+    updateOutput(response);
   });
 }
 
@@ -59,9 +80,16 @@ function handleSubmit(prompt: string) {
   const responseStatus = document.getElementById("response-status") as HTMLSpanElement;
   responseStatus.innerHTML = "(thinking...)";
   chrome.runtime.sendMessage(message, (response: RuntimeMessage): void => {
-    console.debug("response.payload", response);
-    const outputDiv = document.getElementById("output-div") as HTMLDivElement;
-    outputDiv.innerHTML = JSON.stringify(response, null, 2);
+    console.debug("[handleSubmit]: response.payload -", response.payload);
     responseStatus.innerHTML = "";
+    updateOutput(response);
   });
+}
+
+function updateOutput(response: RuntimeMessage) {
+  const outputDiv = document.getElementById("output-div") as HTMLDivElement;
+  outputDiv.innerHTML = `${response.payload!.replace(/^"|"$/g, '')}`;
+  delete response.payload;
+  const statsDiv = document.getElementById("stats-div") as HTMLDivElement;
+  statsDiv.innerHTML = JSON.stringify(response, null, 2);
 }
