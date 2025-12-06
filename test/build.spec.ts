@@ -22,9 +22,9 @@ describe('build', () => {
     expect(fs.existsSync('dist/assets')).toBe(true);
   })
 
-  test('build transpiles .js and source maps', () => {
-    expect(fs.globSync('dist/*.js').length).toBeGreaterThan(0);
-    expect(fs.globSync('dist/*.js.map').length).toBeGreaterThan(0);
+  test('build transpiles .mjs and source maps', () => {
+    expect(fs.globSync('dist/*.mjs').length).toBeGreaterThan(0);
+    expect(fs.globSync('dist/*.mjs.map').length).toBeGreaterThan(0);
   })
 
   test('build creates .zip', () => {
