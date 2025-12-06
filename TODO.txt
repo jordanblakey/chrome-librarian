@@ -1,4 +1,19 @@
+# complex tasks
 feature: create new bookmarks from query and organize them into the existing bookmark structure
 feature: organize existing bookmarks
 feature: version control for bookmarks, rollback to previous version. snapshot each time the extension modifies the tree
 feature: 2 stage process: 1. iteratively create tree from chunks of data, then 2. assign links to the tree. This can address Gemini Nano token limitations.
+
+# simple tasks
+feature: Bookmark backup and restore using storage API 
+feature: Session token counter indicator
+feature: Prompt token cost indicator
+
+# learn
+basic bookmark manipulation: flatten, sort, move, delete, rename, create folder, create bookmark
+
+# brainstorm
+tensorflow.js
+Classify bookmarks k means
+Organize classes to tree classes of classes
+Nano names classes

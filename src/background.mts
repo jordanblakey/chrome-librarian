@@ -1,5 +1,5 @@
-import { TEXT_SCHEMA, GENERATE_BOOKMARKS_JSON_SCHEMA } from "./assets/data/responseConstraintSchemas";
-import { TEXT_SYSTEM_PROMPT, GENERATE_BOOKMARKS_JSON_SYSTEM_PROMPT } from "./assets/data/systemPrompts";
+import { TEXT_SCHEMA, GENERATE_BOOKMARKS_JSON_SCHEMA } from './data/responseConstraintSchemas.mjs';
+import { TEXT_SYSTEM_PROMPT, GENERATE_BOOKMARKS_JSON_SYSTEM_PROMPT } from './data/systemPrompts.mjs';
 
 console.debug("background script loaded...");
 
@@ -15,8 +15,6 @@ async function main() {
 
   chrome.runtime.onMessage.addListener(onMessageHandler);
 }
-
-main();
 
 function onMessageHandler(
   message: RuntimeMessage,
@@ -166,3 +164,5 @@ function getResponseSchema(sessionType: SessionType): any {
     throw new Error("Unsupported session type: " + sessionType);
   }
 }
+
+main();
