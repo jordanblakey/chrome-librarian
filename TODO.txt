@@ -5,7 +5,11 @@ feature: version control for bookmarks, rollback to previous version. snapshot e
 feature: 2 stage process: 1. iteratively create tree from chunks of data, then 2. assign links to the tree. This can address Gemini Nano token limitations.
 
 # simple tasks
-feature: Bookmark backup and restore using storage API 
+feature: Bookmark backup and restore using storage API
+feature: Full screen link for popup
+feature: Searching filters chips
+feature: search chips, not list
+feature: chip favicons
 
 # learn
 basic bookmark manipulation: flatten, sort, move, delete, rename, create folder, create bookmark

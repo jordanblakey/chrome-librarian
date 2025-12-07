@@ -4,8 +4,17 @@
   "version": "1.0.0",
   "description": "A Chrome extension that organizes your bookmarks using Gemini Nano.",
   "permissions": [
-    "bookmarks"
+    "bookmarks",
+    "commands"
   ],
+  "commands": {
+    "search": {
+      "suggested_key": {
+        "default": "Alt+S"
+      },
+      "description": "Search bookmarks"
+    }
+  },
   "action": {
     "default_popup": "assets/html/popup.html"
   },

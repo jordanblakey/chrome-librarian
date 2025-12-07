@@ -6,6 +6,7 @@ export default class BookmarkSearchBar extends HTMLInputElement {
   constructor(bookmarkSearchResultsId: string) {
     super();
     this.type = "text";
+    this.id = "bookmark-search-bar";
     this.placeholder = "Search bookmarks...";
     this.resultsContainerId = bookmarkSearchResultsId;
     this.bookmarkSearchResults = document.getElementById(bookmarkSearchResultsId);

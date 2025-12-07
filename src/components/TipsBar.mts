@@ -1,0 +1,29 @@
+export default class TipsBar extends HTMLParagraphElement {
+  constructor() {
+    super();
+    this.innerHTML = this.getRandomTip();
+    this.initLink();
+  }
+
+  tips = [
+    "check the <b><a id=\"tip-link\" data-action=\"open-options-page\">options page</a></b> for a Prompt API demo.",
+    "press <b>Alt + S</b> to search your bookmark library anywhere.",
+    "experiment with <b>Session Type</b> dropdown to get different results.",
+  ]
+
+  getRandomTip() {
+    return `Tip: ${this.tips[Math.floor(Math.random() * this.tips.length)]}`;
+  }
+
+  initLink() {
+    this.querySelector("#tip-link")?.addEventListener("click", () => {
+      const action = this.querySelector("#tip-link")?.getAttribute("data-action");
+      if (action === "open-options-page") {
+        chrome.runtime.openOptionsPage();
+      }
+    });
+  }
+
+}
+
+customElements.define("options-page-link", TipsBar, { extends: "p" });

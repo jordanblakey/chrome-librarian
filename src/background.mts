@@ -7,6 +7,16 @@ export const backgroundState: BackgroundState = {};
 
 async function main() {
   chrome.runtime.onMessage.addListener(onMessageHandler);
+  chrome.commands.onCommand.addListener(onCommandHandler);
+}
+
+async function onCommandHandler(command: string) {
+  console.debug("[onCommandHandler] command:", command);
+  if (command === "search") {
+    chrome.action.openPopup().catch(error => {
+      console.debug("[onCommandHandler] error:", error);
+    })
+  }
 }
 
 async function onMessageHandler(

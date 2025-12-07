@@ -10,7 +10,7 @@ body.popup-page {
     color: white;
   }
 
-  a#options-link {
+  a#tip-link {
     color: blue;
     text-decoration: underline;
     cursor: pointer;
