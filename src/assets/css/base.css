@@ -1,56 +1,5 @@
-.options-page {
-  h1 {
-    background: blue;
-    color: white;
-  }
-
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .output-group {
-    pre#output-div {
-      margin: 0;
-      text-wrap: auto;
-    }
-  }
-
-  textarea.auto-resize {
-    field-sizing: content;
-  }
-
-  .transcript-message {
-    margin: 1px;
-    padding: 5px;
-    display: inline-block;  
-    &.human-user {
-      background-color: hsl(0deg 0% 90%)
-    }
-    &.assistant {
-      background-color: hsl(250deg 100% 90%)
-    }
-  }
-}
-
-.popup-page {
-  width: 500px;
-
-  h1 {
-    background: green;
-    color: white;
-  }
-
-  pre {
-    margin: 0;
-  }
-
-  #options-link {
-    cursor: pointer;
-    text-decoration: underline;
-    color: blue;
-  }
+.hidden {
+  display: none;
 }
 
 .toast {

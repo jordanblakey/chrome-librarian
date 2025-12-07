@@ -1,0 +1,56 @@
+html, body {
+    height: fit-content;
+}
+
+body.popup-page {
+  min-width: 500px;
+
+  h1 {
+    background: green;
+    color: white;
+  }
+
+  a#options-link {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    &:active {
+      color: red;
+    }
+  }
+
+  #bookmark-chips {
+    &.hidden {
+      display: none;
+    }
+    display: flex;
+    flex-wrap: wrap;
+    .bookmark-chip {
+      border-radius: 5px;
+      border: 1px solid blue;
+      flex-shrink: 1;
+      margin:1px;
+      padding: 2px  5px;
+      text-align: center;
+      text-decoration: none;
+      white-space: nowrap;
+      &:hover {
+        &:visited {
+          background: purple;
+          color: white;
+        }
+        &:active {
+          background: red;
+          color: white;
+          border-color: red;
+        }
+        background: blue;
+        color: white;
+      }
+      &:visited {
+        color: purple;
+        border-color: purple;
+      }
+    }
+  }
+}

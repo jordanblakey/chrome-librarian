@@ -6,7 +6,6 @@ feature: 2 stage process: 1. iteratively create tree from chunks of data, then 2
 
 # simple tasks
 feature: Bookmark backup and restore using storage API 
-bug: Language model session not initialized. seemingly random.
 
 # learn
 basic bookmark manipulation: flatten, sort, move, delete, rename, create folder, create bookmark

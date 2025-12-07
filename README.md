@@ -22,7 +22,7 @@
 - <chrome://chrome-urls/>: List of Chrome URLs
 - <chrome://on-device-internals>: Manage your on-device machine learning models.
 - <chrome://serviceworker-internals/>: Check all service registered service workers
-- <chrome://bookmarks/>: Chrome bookmarnks manager
+- <chrome://bookmarks/>: Chrome bookmarks manager
 - <chrome://inspect>: Inspect all pages
 
 ### Gemini API
