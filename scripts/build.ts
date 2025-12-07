@@ -17,6 +17,8 @@ export async function buildExtension(options: { dev?: boolean } = {}) {
 
     if (options.dev) {
       injectHotReload();
+      // sourcemaps need src to be in dist (the unpacked extension directory)
+      fs.cpSync('src/', 'dist/src/', { recursive: true }); 
     }
 
     // Create zip for Web Store upload

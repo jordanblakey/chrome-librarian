@@ -20,6 +20,18 @@
   textarea.auto-resize {
     field-sizing: content;
   }
+
+  .transcript-message {
+    margin: 1px;
+    padding: 5px;
+    display: inline-block;  
+    &.human-user {
+      background-color: hsl(0deg 0% 90%)
+    }
+    &.assistant {
+      background-color: hsl(250deg 100% 90%)
+    }
+  }
 }
 
 .popup-page {

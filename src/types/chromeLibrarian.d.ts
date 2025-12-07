@@ -17,9 +17,11 @@ type OptionsState = {
   copyButton?: HTMLButtonElement;
   newSessionTypeSelect?: HTMLSelectElement;
   newSessionButton?: HTMLButtonElement;
-  sessionStatsDiv?: HTMLDivElement;
-  responseStatus?: HTMLSpanElement;
+  transcriptDiv?: HTMLDivElement;
   outputDiv?: HTMLDivElement;
+  responseStatus?: HTMLSpanElement;
+  statsDiv?: HTMLDivElement;
+  sessionStatsDiv?: HTMLDivElement;
 };
 
 type PromptOptions = {

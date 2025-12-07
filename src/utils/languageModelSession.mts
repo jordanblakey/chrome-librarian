@@ -48,6 +48,7 @@ export async function newSessionFromMessage(message: RuntimeMessage): Promise<Ru
     backgroundState.sessionController?.abort();
     backgroundState.sessionType = message.sessionType;
     const initialPrompts = [{ role: "system", content: getSystemPrompt(message.sessionType) }];
+    // console.debug("[newSessionFromMessage] initialPrompts", initialPrompts);
     const { session, controller } = await createLanguageModelSession(1, 1, ["en"], initialPrompts);
     backgroundState.session = session;
     backgroundState.sessionController = controller;

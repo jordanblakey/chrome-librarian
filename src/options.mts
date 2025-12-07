@@ -32,9 +32,11 @@ function initPromptControls() {
   optionsState.newSessionButton = document.getElementById(
     "new-session-button",
   ) as HTMLButtonElement;
-  optionsState.sessionStatsDiv = document.getElementById("session-stats-div") as HTMLDivElement;
-  optionsState.responseStatus = document.getElementById("response-status") as HTMLSpanElement;
+  optionsState.transcriptDiv = document.getElementById("transcript-div") as HTMLDivElement;
   optionsState.outputDiv = document.getElementById("output-div") as HTMLDivElement;
+  optionsState.responseStatus = document.getElementById("response-status") as HTMLSpanElement;
+  optionsState.statsDiv = document.getElementById("stats-div") as HTMLDivElement;
+  optionsState.sessionStatsDiv = document.getElementById("session-stats-div") as HTMLDivElement;
   optionsState.isShiftDown = false;
 
   // event listeners
@@ -44,6 +46,7 @@ function initPromptControls() {
     }
     if (event.key === "Enter" && !optionsState.isShiftDown) {
       optionsState.promptButton?.focus();
+      setTimeout(() => optionsState.promptInput?.focus(), 200);
     }
   });
   optionsState.promptInput?.addEventListener("keyup", (event) => {
@@ -51,7 +54,6 @@ function initPromptControls() {
       optionsState.isShiftDown = false;
     }
   });
-
   optionsState.promptButton?.addEventListener("click", () => {
     const message: RuntimeMessagePrompt = {
       payload: optionsState.promptInput!.value,
@@ -59,7 +61,10 @@ function initPromptControls() {
       streaming: optionsState.streamingCheckbox?.checked ?? false,
     };
     optionsState.responseStatus!.innerHTML = "(thinking...)";
-    chrome.runtime.sendMessage(message);
+    chrome.runtime.sendMessage(message)
+    const transcriptMessage = createTranscriptMessage(optionsState.promptInput!.value, "human-user");
+    optionsState.transcriptDiv!.appendChild(transcriptMessage)
+    optionsState.promptInput!.value = "";
   });
   optionsState.stopResponseButton?.addEventListener("click", () => {
     chrome.runtime.sendMessage({
@@ -91,10 +96,11 @@ function onMessageHandler(
   // handle message types
   if (message.type === "response") {
     updateOutput(message);
+    optionsState.responseStatus!.innerHTML = "";
   }
   else if (message.type === "response-streaming") {
     updateOutput(message);
-    if (message.isFinal) {
+    if (!message.isFinal) {
       optionsState.responseStatus!.innerHTML = "";
     }
   }
@@ -119,9 +125,35 @@ function newSession(sessionType: SessionType) {
   chrome.runtime.sendMessage(message);
 }
 
-function updateOutput(response: RuntimeMessage) {
-  optionsState.outputDiv!.innerHTML = `${response.payload!.replace(/^"|"$/g, '')}`;
+function createTranscriptMessage(content: string, role: string): HTMLParagraphElement {
+  const transcriptMessage = document.createElement("p");
+  transcriptMessage.classList.add("transcript-message");
+  transcriptMessage.classList.add(role);
+  transcriptMessage.textContent = content;
+  return transcriptMessage;
+}
+
+function updateTranscriptMessage(content: string, role: string, element: HTMLParagraphElement) {
+  element.textContent = content;
+}
+
+function updateOutput(response: RuntimeMessageResponse) {
+  if (response.hasOwnProperty("isFinal")) {
+    if (!response.isFinal) {
+      const lastTranscriptMessage = optionsState.transcriptDiv!.lastElementChild;
+      const isNotFirstAssistantResponse = lastTranscriptMessage?.getAttribute("class")!.includes("assistant")
+      if (isNotFirstAssistantResponse) {
+        lastTranscriptMessage!.textContent = response.payload!;
+      } else {
+        const transcriptMessage = createTranscriptMessage(response.payload!, "assistant");
+        optionsState.transcriptDiv!.appendChild(transcriptMessage);
+      }
+    }
+  } else {
+    const transcriptMessage = createTranscriptMessage(response.payload!, "assistant");
+    optionsState.transcriptDiv!.appendChild(transcriptMessage);
+  }
   delete response.payload;
-  const statsDiv = document.getElementById("stats-div") as HTMLDivElement;
-  statsDiv.innerHTML = JSON.stringify(response, null, 2);
+  optionsState.statsDiv!.innerHTML = JSON.stringify(response, null, 2);
+
 }

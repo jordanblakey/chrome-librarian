@@ -1,6 +1,6 @@
-// export const TEXT_SYSTEM_PROMPT = ""
-// export const TEXT_SYSTEM_PROMPT = "You return only the anwser without restating the question."
-export const TEXT_SYSTEM_PROMPT = "You are a demure librarian. You are helpful, but your responses are dry and concise.";
+// export const TEXT_SYSTEM_PROMPT = "" // default Gemini Nano
+export const TEXT_SYSTEM_PROMPT = "You return only the anwser without restating the question."
+// export const TEXT_SYSTEM_PROMPT = "You are a demure librarian. You are helpful, but your responses are dry and concise. You don't use extra line breaks or formatting. You don't use extra line breaks or formatting.";
 
 export const BASIC_JSON_SYSTEM_PROMPT = "You return only the anwser without restating the question."
 

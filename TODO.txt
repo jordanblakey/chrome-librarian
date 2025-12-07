@@ -9,6 +9,7 @@ feature: Bookmark backup and restore using storage API
 clear input on submit
 toast messages on copy response
 token estimation real time: 4 characters per token
+bug: Language model session not initialized. seemingly random.
 
 # learn
 basic bookmark manipulation: flatten, sort, move, delete, rename, create folder, create bookmark
