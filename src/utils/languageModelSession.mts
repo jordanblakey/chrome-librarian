@@ -1,5 +1,5 @@
 import { backgroundState } from '../background.mjs';
-import { TEXT_SYSTEM_PROMPT, BASIC_JSON_SYSTEM_PROMPT, GENERATE_BOOKMARKS_JSON_SYSTEM_PROMPT } from '../data/systemPrompts.mjs';
+import { TEXT_SYSTEM_PROMPT, BASIC_JSON_SYSTEM_PROMPT, CODE_SYSTEM_PROMPT, GENERATE_BOOKMARKS_JSON_SYSTEM_PROMPT } from '../data/systemPrompts.mjs';
 
 export async function createLanguageModelSession(
   tempMult: number = 1.0,
@@ -83,6 +83,9 @@ export function getSystemPrompt(sessionType: SessionType): string {
   }
   else if (sessionType === "prompt-basic-json") {
     return BASIC_JSON_SYSTEM_PROMPT;
+  }
+  else if (sessionType === "prompt-code") {
+    return CODE_SYSTEM_PROMPT;
   }
   else if (sessionType === "prompt-generate-bookmarks-json") {
     return GENERATE_BOOKMARKS_JSON_SYSTEM_PROMPT;

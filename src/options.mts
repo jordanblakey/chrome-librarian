@@ -26,6 +26,9 @@ function initPromptControls() {
   optionsState.copyButton = document.getElementById(
     "copy-button",
   ) as HTMLButtonElement;
+  optionsState.tokenEstimate = document.getElementById(
+    "token-estimate",
+  ) as HTMLSpanElement;
   optionsState.newSessionTypeSelect = document.getElementById(
     "new-session-type-select",
   ) as HTMLSelectElement;
@@ -53,6 +56,8 @@ function initPromptControls() {
     if (event.key === "Shift") {
       optionsState.isShiftDown = false;
     }
+    const tokenEstimate = Math.ceil(optionsState.promptInput!.value.length / 4);
+    optionsState.tokenEstimate!.innerHTML = `Token estimate: ${tokenEstimate}`;
   });
   optionsState.promptButton?.addEventListener("click", () => {
     const message: RuntimeMessagePrompt = {
@@ -77,7 +82,9 @@ function initPromptControls() {
     });
   });
   optionsState.copyButton?.addEventListener("click", () => {
-    navigator.clipboard.writeText(optionsState.outputDiv!.innerHTML)
+    const text = optionsState.transcriptDiv!.lastChild?.textContent
+    navigator.clipboard.writeText(`${text?.trim() || ""}`)
+    toast("Copied!", "success");
   });
   optionsState.newSessionTypeSelect?.addEventListener("change", () => newSession(optionsState.newSessionTypeSelect!.value as SessionType));
   optionsState.newSessionButton?.addEventListener("click", () => newSession(optionsState.newSessionTypeSelect!.value as SessionType));
@@ -127,14 +134,14 @@ function newSession(sessionType: SessionType) {
 
 function createTranscriptMessage(content: string, role: string): HTMLParagraphElement {
   const transcriptMessage = document.createElement("p");
+  transcriptMessage.addEventListener("click", () => {
+    navigator.clipboard.writeText(transcriptMessage.textContent!.trim());
+    toast("Copied!", "success");
+  });
   transcriptMessage.classList.add("transcript-message");
   transcriptMessage.classList.add(role);
   transcriptMessage.textContent = content;
   return transcriptMessage;
-}
-
-function updateTranscriptMessage(content: string, role: string, element: HTMLParagraphElement) {
-  element.textContent = content;
 }
 
 function updateOutput(response: RuntimeMessageResponse) {
@@ -156,4 +163,13 @@ function updateOutput(response: RuntimeMessageResponse) {
   delete response.payload;
   optionsState.statsDiv!.innerHTML = JSON.stringify(response, null, 2);
 
+}
+
+function toast(message: string, type: "success" | "error" | "warning" | "info") {
+  const toast = document.createElement("div");
+  toast.classList.add("toast");
+  toast.classList.add(type);
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 1000);
 }

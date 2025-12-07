@@ -22,16 +22,18 @@ export async function buildExtension(options: { dev?: boolean } = {}) {
     }
 
     // Create zip for Web Store upload
-    const admZip = new AdmZip()
-    admZip.addLocalFolder('dist')
-    admZip.writeZip('dist/chrome-librarian.zip')
+    if (!options.dev) {
+      const admZip = new AdmZip()
+      admZip.addLocalFolder('dist')
+      admZip.writeZip('dist/chrome-librarian.zip')
+    }
     resolve();
   });
 
   await buildPromise;
   spinner.succeed(`Build complete. ${((Date.now() - startTime) / 1000).toFixed(1)}s`);
   console.log('📂 Unpacked extension: dist/');
-  console.log(`📦 Web Store Zip: chrome-librarian.zip`)
+  console.log('📦 Web Store Zip: chrome-librarian.zip');
 }
 
 function injectHotReload() {

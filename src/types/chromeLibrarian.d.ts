@@ -1,5 +1,5 @@
 
-type SessionType = "prompt-text" | "prompt-basic-json" | "prompt-generate-bookmarks-json";
+type SessionType = "prompt-text" | "prompt-basic-json" | "prompt-code" | "prompt-generate-bookmarks-json";
 
 type BackgroundState = {
   session?: LanguageModel;
@@ -15,6 +15,7 @@ type OptionsState = {
   streamingCheckbox?: HTMLInputElement;
   stopResponseButton?: HTMLButtonElement;
   copyButton?: HTMLButtonElement;
+  tokenEstimate?: HTMLSpanElement;
   newSessionTypeSelect?: HTMLSelectElement;
   newSessionButton?: HTMLButtonElement;
   transcriptDiv?: HTMLDivElement;
