@@ -9,7 +9,7 @@ async function main() {
   chrome.runtime.onMessage.addListener(onMessageHandler);
 }
 
-function onMessageHandler(
+async function onMessageHandler(
   message: RuntimeMessage,
   sender: chrome.runtime.MessageSender,
   sendResponse: (response?: RuntimeMessage | void) => void,
@@ -18,6 +18,9 @@ function onMessageHandler(
   console.debug("[onMessageHandler] sender:", sender);
 
   if (message.type === "prompt") {
+    backgroundState.sessionType = 'prompt-text';
+    if (!backgroundState.session)
+      await newSessionFromMessage({ type: "new-session", sessionType: backgroundState.sessionType })
     promptFromMessage(message).then((response) => sendResponse(response)).catch((error) => errorHandler(error, sendResponse));
     return true;
   }

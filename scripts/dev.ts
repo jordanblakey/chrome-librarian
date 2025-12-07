@@ -26,7 +26,7 @@ function broadcastReload(type: 'full' | 'ui') {
 
 // Initial build
 try {
-    await buildExtension({ dev: true });
+    buildExtension({ dev: true });
 } catch (e) {
     console.error('[Dev] Initial build failed:', e);
 }
@@ -43,7 +43,7 @@ const watcher = chokidar.watch(['src', 'manifest.json'], {
 watcher.on('all', async (event, path) => {
     console.log(`[Dev] Change detected (${event}): ${path}`);
     try {
-        await buildExtension({ dev: true });
+        buildExtension({ dev: true });
         console.log('[Dev] Rebuild successful, reloading extension...');
 
         // Determine reload type

@@ -4,36 +4,37 @@ import * as fs from 'fs';
 import ora from 'ora';
 import * as ts from 'typescript';
 
-export async function buildExtension(options: { dev?: boolean } = {}) {
+export function buildExtension(options: { dev?: boolean } = {}) {
   const startTime = Date.now();
   const spinner = ora('Building extension...\n').start();
+  let hasTypeScriptErrors = false;
 
-  const buildPromise = new Promise<void>((resolve) => {
-    // Build unpacked extension
-    fs.rmSync('dist', { recursive: true, force: true });
+  // Build unpacked extension
+  fs.rmSync('dist', { recursive: true, force: true });
+  try {
     execSync('npx tsc --build tsconfig.json', { stdio: 'inherit' });
-    fs.cpSync('manifest.json', 'dist/manifest.json');
-    fs.cpSync('src/assets', 'dist/assets', { recursive: true });
+  } catch (e: any) {
+    spinner.fail('TypeScript compilation failed.');
+    return
+  }
+  fs.cpSync('manifest.json', 'dist/manifest.json');
+  fs.cpSync('src/assets', 'dist/assets', { recursive: true });
 
-    if (options.dev) {
-      injectHotReload();
-      // sourcemaps need src to be in dist (the unpacked extension directory)
-      fs.cpSync('src/', 'dist/src/', { recursive: true }); 
-    }
+  if (options.dev) {
+    injectHotReload();
+    // sourcemaps need src to be in dist (the unpacked extension directory)
+    fs.cpSync('src/', 'dist/src/', { recursive: true }); 
+  }
 
-    // Create zip for Web Store upload
-    if (!options.dev) {
-      const admZip = new AdmZip()
-      admZip.addLocalFolder('dist')
-      admZip.writeZip('dist/chrome-librarian.zip')
-    }
-    resolve();
-  });
-
-  await buildPromise;
   spinner.succeed(`Build complete. ${((Date.now() - startTime) / 1000).toFixed(1)}s`);
   console.log('📂 Unpacked extension: dist/');
-  console.log('📦 Web Store Zip: chrome-librarian.zip');
+  if (!options.dev) {
+    // Create zip for Web Store upload
+    const admZip = new AdmZip()
+    admZip.addLocalFolder('dist')
+    admZip.writeZip('dist/chrome-librarian.zip')
+    console.log('📦 Web Store Zip: chrome-librarian.zip');
+  }
 }
 
 function injectHotReload() {
@@ -57,4 +58,4 @@ function injectHotReload() {
 }
 
 // Only run if called directly
-import.meta.main && await buildExtension();
+import.meta.main && buildExtension();
