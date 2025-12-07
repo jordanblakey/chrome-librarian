@@ -9,7 +9,7 @@
   <h1>Chrome Librarian</h1>
 
   <div class="input-group">
-    <textarea name="prompt-input" id="prompt-input" placeholder="prompt Gemini Nano..."></textarea>
+    <textarea name="prompt-input" id="prompt-input" placeholder="prompt Gemini Nano..." class="auto-resize"></textarea>
     <div class="button-row">
       <button id="prompt-button">Prompt</button>
       <input type="checkbox" id="streaming-checkbox" checked>
@@ -17,23 +17,26 @@
       <button id="stop-response-button">Stop Response</button>
       <button id="copy-button">Copy Response</button>
     </div>
-    <div class="button-row">
+    <div class="button-row">  
       <label for="new-session-type-select">Session Type:</label>
       <select id="new-session-type-select">
-        <option value="prompt-text">Text Prompt</option>
+        <option value="prompt-text">Text</option>
+        <option value="prompt-basic-json">Basic JSON</option>
         <option value="prompt-generate-bookmarks-json">Generate Bookmarks JSON</option>
       </select>
       <button id="new-session-button">New Session</button>
-      <p><b>Session Stats:</b></p>
-      <pre id="session-stats-div"></pre>
+
     </div>
   </div>
 
   <div class="output-group">
     <p><b>Response:</b> <span id="response-status"></span></p>
     <pre id="output-div"></pre>
+    <hr>
     <p><b>Stats:</b> <span id="stats-status"></span></p>
     <pre id="stats-div"></pre>
+    <p><b>Session Stats:</b></p>
+    <pre id="session-stats-div"></pre>
   </div>
 
   <script src="../../options.mjs" type="module"></script>

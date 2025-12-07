@@ -1,6 +1,15 @@
-export const TEXT_SCHEMA = {
-  type: "string",
-  description: "A string containing the text to be processed.",
+export const BASIC_JSON_SCHEMA = {
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "The complete, generated text response."
+    }
+  },
+  "required": [
+    "text"
+  ],
+  "additionalProperties": false // Crucial: Prevents any other fields from being generated
 };
 
 // This schema enforces the exact structure needed for the Chrome Bookmarks API.

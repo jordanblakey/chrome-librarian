@@ -1,5 +1,5 @@
 
-type SessionType = "prompt-text" | "prompt-generate-bookmarks-json";
+type SessionType = "prompt-text" | "prompt-basic-json" | "prompt-generate-bookmarks-json";
 
 type BackgroundState = {
   session?: LanguageModel;
@@ -8,7 +8,9 @@ type BackgroundState = {
 };
 
 type OptionsState = {
+  sessionType?: SessionType;
   promptInput?: HTMLTextAreaElement;
+  isShiftDown?: boolean;
   promptButton?: HTMLButtonElement;
   streamingCheckbox?: HTMLInputElement;
   stopResponseButton?: HTMLButtonElement;
@@ -18,6 +20,11 @@ type OptionsState = {
   sessionStatsDiv?: HTMLDivElement;
   responseStatus?: HTMLSpanElement;
   outputDiv?: HTMLDivElement;
+};
+
+type PromptOptions = {
+  signal?: AbortSignal;
+  responseConstraint?: any;
 };
 
 interface RuntimeMessage {

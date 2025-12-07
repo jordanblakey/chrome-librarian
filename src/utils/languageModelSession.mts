@@ -1,5 +1,5 @@
 import { backgroundState } from '../background.mjs';
-import { TEXT_SYSTEM_PROMPT, GENERATE_BOOKMARKS_JSON_SYSTEM_PROMPT } from '../data/systemPrompts.mjs';
+import { TEXT_SYSTEM_PROMPT, BASIC_JSON_SYSTEM_PROMPT, GENERATE_BOOKMARKS_JSON_SYSTEM_PROMPT } from '../data/systemPrompts.mjs';
 
 export async function createLanguageModelSession(
   tempMult: number = 1.0,
@@ -30,10 +30,12 @@ export async function createLanguageModelSession(
       },
     }
   );
-  console.debug("[createLanguageModelSession] created in", Math.round(performance.now() - startTime) + "ms");
+  console.debug("[createLanguageModelSession] created in", Math.round(performance.now() - startTime) + "ms", session);
 
   return { session, controller };
-}export async function newSessionFromMessage(message: RuntimeMessage): Promise<RuntimeMessage | RuntimeMessageSessionStats> {
+}
+
+export async function newSessionFromMessage(message: RuntimeMessage): Promise<RuntimeMessage | RuntimeMessageSessionStats> {
   if (!message.sessionType) {
     return {
       payload: "No session type specified.",
@@ -54,6 +56,9 @@ export async function createLanguageModelSession(
       sessionType: message.sessionType,
       inputUsage: session.inputUsage,
       inputQuota: session.inputQuota,
+      topK: session.topK,
+      temperature: session.temperature,
+      initialPrompts: initialPrompts,
     });
     return {
       payload: "New session created.",
@@ -74,6 +79,9 @@ export async function createLanguageModelSession(
 export function getSystemPrompt(sessionType: SessionType): string {
   if (sessionType === "prompt-text") {
     return TEXT_SYSTEM_PROMPT;
+  }
+  else if (sessionType === "prompt-basic-json") {
+    return BASIC_JSON_SYSTEM_PROMPT;
   }
   else if (sessionType === "prompt-generate-bookmarks-json") {
     return GENERATE_BOOKMARKS_JSON_SYSTEM_PROMPT;

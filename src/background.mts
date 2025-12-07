@@ -12,13 +12,13 @@ async function main() {
 function onMessageHandler(
   message: RuntimeMessage,
   sender: chrome.runtime.MessageSender,
-  sendResponse: (response?: RuntimeMessage) => void,
+  sendResponse: (response?: RuntimeMessage | void) => void,
 ) {
   console.debug("[onMessageHandler] message:", message);
   console.debug("[onMessageHandler] sender:", sender);
 
   if (message.type === "prompt") {
-    promptFromMessage(message).catch((error) => errorHandler(error, sendResponse));
+    promptFromMessage(message).then((response) => sendResponse(response)).catch((error) => errorHandler(error, sendResponse));
     return true;
   }
   else if (message.type === "new-session") {

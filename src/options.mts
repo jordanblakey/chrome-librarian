@@ -6,6 +6,7 @@ function optionsMain() {
   initPromptControls();
   chrome.runtime.onMessage.addListener(onMessageHandler);
   newSession(optionsState.newSessionTypeSelect!.value as SessionType)
+  optionsState.promptInput?.focus();
 }
 
 typeof window !== "undefined" && optionsMain();
@@ -34,13 +35,23 @@ function initPromptControls() {
   optionsState.sessionStatsDiv = document.getElementById("session-stats-div") as HTMLDivElement;
   optionsState.responseStatus = document.getElementById("response-status") as HTMLSpanElement;
   optionsState.outputDiv = document.getElementById("output-div") as HTMLDivElement;
+  optionsState.isShiftDown = false;
 
   // event listeners
   optionsState.promptInput?.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
+    if (event.key === "Shift") {
+      optionsState.isShiftDown = true;
+    }
+    if (event.key === "Enter" && !optionsState.isShiftDown) {
       optionsState.promptButton?.focus();
     }
   });
+  optionsState.promptInput?.addEventListener("keyup", (event) => {
+    if (event.key === "Shift") {
+      optionsState.isShiftDown = false;
+    }
+  });
+
   optionsState.promptButton?.addEventListener("click", () => {
     const message: RuntimeMessagePrompt = {
       payload: optionsState.promptInput!.value,
@@ -88,6 +99,7 @@ function onMessageHandler(
     }
   }
   else if (message.type === "session-stats") {
+    optionsState.sessionType = message.sessionType;
     optionsState.sessionStatsDiv!.innerHTML = JSON.stringify(message, null, 2);
   }
   else {
@@ -108,9 +120,7 @@ function newSession(sessionType: SessionType) {
 }
 
 function updateOutput(response: RuntimeMessage) {
-  // console.debug("[updateOutput] response:", response);
-  const outputDiv = document.getElementById("output-div") as HTMLDivElement;
-  outputDiv.innerHTML = `${response.payload!.replace(/^"|"$/g, '')}`;
+  optionsState.outputDiv!.innerHTML = `${response.payload!.replace(/^"|"$/g, '')}`;
   delete response.payload;
   const statsDiv = document.getElementById("stats-div") as HTMLDivElement;
   statsDiv.innerHTML = JSON.stringify(response, null, 2);

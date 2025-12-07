@@ -25,6 +25,9 @@
 - <chrome://bookmarks/>: Chrome bookmarnks manager
 - <chrome://inspect>: Inspect all pages
 
+### Gemini API
+- <https://ai.google.dev/gemini-api/docs/tokens?lang=node>
+
 ## Development
 
 ### Hot Reloading

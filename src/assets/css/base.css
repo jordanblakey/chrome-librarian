@@ -16,6 +16,10 @@
       text-wrap: auto;
     }
   }
+
+  textarea.auto-resize {
+    field-sizing: content;
+  }
 }
 
 .popup-page {

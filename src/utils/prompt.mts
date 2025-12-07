@@ -1,23 +1,31 @@
 import { backgroundState } from '../background.mjs';
-import { TEXT_SCHEMA, GENERATE_BOOKMARKS_JSON_SCHEMA } from '../data/responseConstraintSchemas.mjs';
+import { BASIC_JSON_SCHEMA, GENERATE_BOOKMARKS_JSON_SCHEMA } from '../data/responseConstraintSchemas.mjs';
 
 export async function promptFromMessage(
   message: RuntimeMessagePrompt): Promise<void> {
   console.debug("[promptFromMessage] message.payload:", message.payload);
+  console.debug("[promptFromMessage] backgroundState:", backgroundState)
   if (backgroundState.session) {
     
     const startTime = performance.now();
     const inputUsage = backgroundState.session.inputUsage;
+    const options: PromptOptions = {
+      signal: backgroundState.sessionController?.signal,
+    };
+
+    if (backgroundState.sessionType === "prompt-basic-json") {
+      options.responseConstraint = BASIC_JSON_SCHEMA;
+    }
+    else if (backgroundState.sessionType === "prompt-generate-bookmarks-json") {
+      options.responseConstraint = GENERATE_BOOKMARKS_JSON_SCHEMA;
+    }
 
     // Prompt the LanguageModel
     let response = "";
     try {
       // handle streaming response
       if (message.streaming) {
-        const stream = await backgroundState.session.promptStreaming(message.payload, {
-          signal: backgroundState.sessionController?.signal,
-          responseConstraint: await getResponseConstraintSchema(backgroundState.sessionType!)
-        });
+        const stream = await backgroundState.session.promptStreaming(message.payload, options);
         console.debug("[promptFromMessage] created stream:", stream)
         let responseMessage: RuntimeMessageResponse = { type: "response-streaming" };
         for await (const chunk of stream) {
@@ -31,6 +39,7 @@ export async function promptFromMessage(
             promptInputUsage: "streaming...",
             isFinal: false
           };
+          
           chrome.runtime.sendMessage(responseMessage);
         }
         responseMessage.isFinal = true;
@@ -38,10 +47,7 @@ export async function promptFromMessage(
         chrome.runtime.sendMessage(responseMessage);
       } else {
         // handle non-streaming response
-        response = await backgroundState.session.prompt(message.payload, {
-          responseConstraint: await getResponseConstraintSchema(backgroundState.sessionType!),
-          signal: backgroundState.sessionController?.signal,
-        });
+        response = await backgroundState.session.prompt(message.payload, options);
         chrome.runtime.sendMessage({
           type: "response",
           payload: response,
@@ -78,10 +84,7 @@ export async function promptFromMessage(
 
 export async function getResponseConstraintSchema(sessionType: SessionType): Promise<any> {
   let responseConstraintSchema: object;
-  if (sessionType === "prompt-text") {
-    responseConstraintSchema = TEXT_SCHEMA;
-  }
-  else if (sessionType === "prompt-generate-bookmarks-json") {
+  if (sessionType === "prompt-generate-bookmarks-json") {
     responseConstraintSchema = GENERATE_BOOKMARKS_JSON_SCHEMA;
   }
   else {
