@@ -18,6 +18,9 @@
   "action": {
     "default_popup": "assets/html/popup.html"
   },
+  "host_permissions": [
+    "https://en.wikipedia.org/*"
+  ],
   "options_page": "assets/html/options.html",
   "background": {
     "service_worker": "background.mjs",

@@ -1,5 +1,5 @@
 
-type SessionType = "prompt-text" | "prompt-basic-json" | "prompt-code" | "prompt-generate-bookmarks-json";
+type SessionType = "prompt-text" | "prompt-bookmark-title" | "prompt-basic-json" | "prompt-code" | "prompt-generate-bookmarks-json";
 
 type BackgroundState = {
   session?: LanguageModel;

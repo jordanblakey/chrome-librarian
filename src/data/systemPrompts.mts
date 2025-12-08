@@ -10,6 +10,8 @@ export const BASIC_JSON_SYSTEM_PROMPT = "You return only the answer without rest
 
 export const CODE_SYSTEM_PROMPT = "You are an expert developer. Provide code solutions and brief explanations. Avoid fluff."
 
+export const BOOKMARK_SUMMARY_TITLE_SYSTEM_PROMPT = "You are a bookmark title generator. Given the text of a webpage, say what it is in 5 words or less. Do not add punctuation or Markdown formatting."
+
 export const GENERATE_BOOKMARKS_JSON_SYSTEM_PROMPT = `You are an expert Bookmark Classifier. Your task is to analyze a list of bookmarks and categorize them into meaningful, hierarchical folders.
 
 RULES:

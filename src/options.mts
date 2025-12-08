@@ -1,12 +1,15 @@
+import { bookmarkTitleGeneratorDemo } from "./experimental/bookmarkTitleGeneratorDemo.mjs";
+
 console.debug("[options] script loaded...");
 
 export const optionsState: OptionsState = {};
 
-function optionsMain() {
+async function optionsMain() {
   initPromptControls();
   chrome.runtime.onMessage.addListener(onMessageHandler);
   newSession(optionsState.newSessionTypeSelect!.value as SessionType)
   optionsState.promptInput?.focus();
+  bookmarkTitleGeneratorDemo();
 }
 
 typeof window !== "undefined" && optionsMain();
@@ -172,3 +175,4 @@ function toast(message: string, type: "success" | "error" | "warning" | "info") 
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 1000);
 }
+
