@@ -15,7 +15,7 @@ export async function bookmarkTitleGeneratorDemo() {
         chrome.runtime.sendMessage(message);
       });
     }
-  }, 100);
+  }, 1000);
 }
 
 async function summarizeUrl(url: string): Promise<string> {

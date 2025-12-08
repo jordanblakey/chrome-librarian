@@ -4,14 +4,14 @@ feature: organize existing bookmarks
 feature: version control for bookmarks, rollback to previous version. snapshot each time the extension modifies the tree
 feature: 2 stage process: 1. iteratively create tree from chunks of data, then 2. assign links to the tree. This can address Gemini Nano token limitations.
 feature: semantic bookmark search
+feature: bookmark title generation. Find bookmarks with short titles and generate titles for them. format: summary | domain
 
 # simple tasks
 feature: Bookmark backup and restore using storage API
-feature: Full screen link for popup
 feature: Arrow navigation for chips
 feature: sort select, default most recent
+feature: favicon caching
 bug: null query not handled when multiple characters deleted at once
-bug: chips not omitting folders
 
 # learn
 basic bookmark manipulation: flatten, sort, move, delete, rename, create folder, create bookmark

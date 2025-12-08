@@ -4,8 +4,8 @@ export default class BookmarkChips extends HTMLDivElement {
     super();
     this.id = "bookmark-chips";
     this.searchInput = document.getElementById("bookmark-search-bar") as HTMLInputElement;
-    this.searchInput.addEventListener('input', () => {
-      if (this.searchInput.value === "") return
+    this.searchInput.addEventListener('input', async() => {
+      if (this.searchInput.value === "") await this.handleNullQuery();
       this.searchBookmarkChips(this.searchInput.value)
     });
     this.searchInput.addEventListener('focus', async () => {
@@ -28,7 +28,9 @@ export default class BookmarkChips extends HTMLDivElement {
       return;
     }
     const results = await chrome.bookmarks.search(query);
-    const chips = results.map(result => this.bookmarkTreeNodeToChip(result));
+    const chips = results
+      .filter(result => result.url)
+      .map(result => this.bookmarkTreeNodeToChip(result));
     this.replaceChildren(...chips);
   }
 

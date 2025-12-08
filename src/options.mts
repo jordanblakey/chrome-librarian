@@ -1,4 +1,5 @@
 import { bookmarkTitleGeneratorDemo } from "./experimental/bookmarkTitleGeneratorDemo.mjs";
+import ExportBookmarksButton from "./components/ExportBookmarksButton.mjs";
 
 console.debug("[options] script loaded...");
 
@@ -9,7 +10,9 @@ async function optionsMain() {
   chrome.runtime.onMessage.addListener(onMessageHandler);
   newSession(optionsState.newSessionTypeSelect!.value as SessionType)
   optionsState.promptInput?.focus();
-  bookmarkTitleGeneratorDemo();
+  // bookmarkTitleGeneratorDemo();
+
+  document.querySelectorAll(".button-row")[1]!.appendChild(new ExportBookmarksButton());
 }
 
 typeof window !== "undefined" && optionsMain();
