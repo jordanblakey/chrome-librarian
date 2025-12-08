@@ -1,7 +1,7 @@
 import { promptFromMessage } from './utils/prompt.mjs';
 import { newSessionFromMessage } from './utils/languageModelSession.mjs';
 
-console.debug("background script loaded...");
+console.debug("[background] script loaded...");
 
 export const backgroundState: BackgroundState = {};
 

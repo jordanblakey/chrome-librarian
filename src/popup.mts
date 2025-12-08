@@ -1,15 +1,18 @@
 import TipsBar from "./components/TipsBar.mjs";
 import BookmarkSearchBar from "./components/BookmarkSearchBar.mjs";
-import BookmarkSearchResults from "./components/BookmarkSearchResults.mjs";
-import ToggleButton from "./components/ToggleButton.mjs";
 import BookmarkChips from "./components/BookmarkChips.mjs";
 
 console.debug("[popup] script loaded...");
 
 async function main() {
   initPageContent();
-  window.addEventListener('focus', () => {
-    document.getElementById("bookmark-search-bar")!.focus();
+
+  const searchBar = document.getElementById("bookmark-search-bar");
+  window.addEventListener('focus', () => searchBar!.focus());
+  chrome.commands.onCommand.addListener(command => {
+    if (command === 'search' && document.activeElement !== searchBar) {
+      searchBar?.focus();
+    }
   });
 }
 
@@ -21,7 +24,5 @@ export function initPageContent() {
   controlBar!.appendChild(new BookmarkSearchBar("bookmark-search-results"));
 
   const mainContent = document.getElementById("main-content");    
-  mainContent!.appendChild(new BookmarkSearchResults());
-  mainContent!.appendChild(new ToggleButton("bookmark-chips", "bookmark chips"));
   mainContent!.appendChild(new BookmarkChips());
 }

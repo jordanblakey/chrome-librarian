@@ -26,11 +26,14 @@ body.popup-page {
     display: flex;
     flex-wrap: wrap;
     .bookmark-chip {
+      display: flex;
+      align-items: center;
+      gap: 3px;
       border-radius: 5px;
       border: 1px solid blue;
       flex-shrink: 1;
       margin:1px;
-      padding: 2px  5px;
+      padding: 2px  5px 2px 3px;
       text-align: center;
       text-decoration: none;
       white-space: nowrap;
@@ -51,6 +54,11 @@ body.popup-page {
         color: purple;
         border-color: purple;
       }
+
+      img {
+        width: 16px;
+        height: 16px;
+      } 
     }
   }
 }

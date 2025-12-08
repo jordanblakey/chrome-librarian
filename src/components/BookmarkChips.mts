@@ -1,22 +1,52 @@
 export default class BookmarkChips extends HTMLDivElement {
+  searchInput: HTMLInputElement;
   constructor() {
     super();
     this.id = "bookmark-chips";
-    this.createBookmarkChips();
-    this.classList.add("hidden");
+    this.searchInput = document.getElementById("bookmark-search-bar") as HTMLInputElement;
+    this.searchInput.addEventListener('input', () => {
+      if (this.searchInput.value === "") return
+      this.searchBookmarkChips(this.searchInput.value)
+    });
+    this.searchInput.addEventListener('focus', async () => {
+      if (this.searchInput.value === "") await this.handleNullQuery();
+    });
   }
 
-  async createBookmarkChips() {
+  async handleNullQuery() {
     const tree = await chrome.bookmarks.getTree();
     const walk = await this.walkBookmarks(tree);
-    const bookmarks = walk.map(node => node[0]).filter(node => node.url).map(node => {
-      const chip = document.createElement('a');
-      chip.classList.add('bookmark-chip');
-      chip.setAttribute('href', node.url || '');
-      chip.innerText = node.title;
-      return chip;
+    this.innerHTML = "";
+    walk.forEach(node => {
+      if (!node[0].url) return;
+      const chip = this.bookmarkTreeNodeToChip(node[0]);
+      this.append(chip);
     });
-    this.append(...bookmarks);
+  }
+
+  async searchBookmarkChips(query: string) {
+    if (this.searchInput.value === "") {
+      await this.handleNullQuery();
+      return;
+    }
+    this.innerHTML = "";
+    const results = await chrome.bookmarks.search(query);
+    results.forEach(result => {
+      const chip = this.bookmarkTreeNodeToChip(result);
+      this.append(chip);
+    });
+  }
+
+  bookmarkTreeNodeToChip(node: chrome.bookmarks.BookmarkTreeNode) {
+    const chip = document.createElement('a');
+    chip.target = "_blank";
+    const favicon = document.createElement('img');
+    favicon.src = `https://www.google.com/s2/favicons?domain=${node.url}&sz=32`;
+    chip.append(favicon);
+    chip.classList.add('bookmark-chip');
+    chip.setAttribute('href', node.url || '');
+    chip.innerHTML += node.title;
+    return chip;
   }
 
   async walkBookmarks(
