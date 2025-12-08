@@ -1,9 +1,18 @@
+html {
+  width: 785px;
+  margin: 0;
+  box-sizing:border-box;
+  scrollbar-gutter: stable; 
+}
+
 html, body {
     height: fit-content;
+    box-sizing:border-box;
 }
 
 body.popup-page {
-  min-width: 500px;
+  margin: 8px;
+  box-sizing:border-box;
 
   h1 {
     background: green;
@@ -27,10 +36,17 @@ body.popup-page {
     flex-wrap: wrap;
     .bookmark-chip {
       display: flex;
+      max-width: calc(50% - 12px);
+      .chip-title {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
       align-items: center;
       gap: 3px;
       border-radius: 5px;
       border: 1px solid blue;
+      flex-grow: 1;
       flex-shrink: 1;
       margin:1px;
       padding: 2px  5px 2px 3px;

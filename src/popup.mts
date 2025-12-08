@@ -10,8 +10,9 @@ async function main() {
   const searchBar = document.getElementById("bookmark-search-bar");
   window.addEventListener('focus', () => searchBar!.focus());
   chrome.commands.onCommand.addListener(command => {
-    if (command === 'search' && document.activeElement !== searchBar) {
-      searchBar?.focus();
+    if (command === 'search') {
+      window.scrollTo({ top: 0 });
+      searchBar!.focus();
     }
   });
 }

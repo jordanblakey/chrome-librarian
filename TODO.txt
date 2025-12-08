@@ -8,6 +8,10 @@ feature: semantic bookmark search
 # simple tasks
 feature: Bookmark backup and restore using storage API
 feature: Full screen link for popup
+feature: Arrow navigation for chips
+feature: sort select, default most recent
+bug: null query not handled when multiple characters deleted at once
+bug: chips not omitting folders
 
 # learn
 basic bookmark manipulation: flatten, sort, move, delete, rename, create folder, create bookmark

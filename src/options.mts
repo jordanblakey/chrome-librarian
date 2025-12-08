@@ -77,7 +77,7 @@ function initPromptControls() {
       payload: "User clicked Stop Response button.",
     }, (response: RuntimeMessage): void => {
       if (response.status === "success") {
-        optionsState.responseStatus!.innerHTML = "";
+        optionsState.responseStatus!.replaceChildren();
       }
     });
   });
@@ -103,12 +103,12 @@ function onMessageHandler(
   // handle message types
   if (message.type === "response") {
     updateOutput(message);
-    optionsState.responseStatus!.innerHTML = "";
+    optionsState.responseStatus!.replaceChildren();
   }
   else if (message.type === "response-streaming") {
     updateOutput(message);
     if (!message.isFinal) {
-      optionsState.responseStatus!.innerHTML = "";
+      optionsState.responseStatus!.replaceChildren();
     }
   }
   else if (message.type === "session-stats") {
@@ -162,7 +162,6 @@ function updateOutput(response: RuntimeMessageResponse) {
   }
   delete response.payload;
   optionsState.statsDiv!.innerHTML = JSON.stringify(response, null, 2);
-
 }
 
 function toast(message: string, type: "success" | "error" | "warning" | "info") {

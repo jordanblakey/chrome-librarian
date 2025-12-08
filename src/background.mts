@@ -10,8 +10,10 @@ async function main() {
   chrome.commands.onCommand.addListener(onCommandHandler);
 }
 
+main();
+
 async function onCommandHandler(command: string) {
-  console.debug("[onCommandHandler] command:", command);
+  // console.debug("[onCommandHandler] command:", command);
   if (command === "search") {
     chrome.action.openPopup().catch(error => {
       console.debug("[onCommandHandler] error:", error);
@@ -67,5 +69,3 @@ function errorHandler(error: Error, sendResponse: (response?: RuntimeMessage) =>
     status: "failure",
   });
 }
-
-main();

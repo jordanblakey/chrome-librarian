@@ -16,12 +16,10 @@ export default class BookmarkChips extends HTMLDivElement {
   async handleNullQuery() {
     const tree = await chrome.bookmarks.getTree();
     const walk = await this.walkBookmarks(tree);
-    this.innerHTML = "";
-    walk.forEach(node => {
-      if (!node[0].url) return;
-      const chip = this.bookmarkTreeNodeToChip(node[0]);
-      this.append(chip);
-    });
+    const chips = walk
+      .filter(node => node[0].url)
+      .map(node => this.bookmarkTreeNodeToChip(node[0]));
+    this.replaceChildren(...chips);
   }
 
   async searchBookmarkChips(query: string) {
@@ -29,12 +27,9 @@ export default class BookmarkChips extends HTMLDivElement {
       await this.handleNullQuery();
       return;
     }
-    this.innerHTML = "";
     const results = await chrome.bookmarks.search(query);
-    results.forEach(result => {
-      const chip = this.bookmarkTreeNodeToChip(result);
-      this.append(chip);
-    });
+    const chips = results.map(result => this.bookmarkTreeNodeToChip(result));
+    this.replaceChildren(...chips);
   }
 
   bookmarkTreeNodeToChip(node: chrome.bookmarks.BookmarkTreeNode) {
@@ -44,8 +39,12 @@ export default class BookmarkChips extends HTMLDivElement {
     favicon.src = `https://www.google.com/s2/favicons?domain=${node.url}&sz=32`;
     chip.append(favicon);
     chip.classList.add('bookmark-chip');
+    chip.title = node.title;
     chip.setAttribute('href', node.url || '');
-    chip.innerHTML += node.title;
+    const span = document.createElement('span')
+    span.textContent = node.title;
+    span.classList.add('chip-title');
+    chip.appendChild(span);
     return chip;
   }
 
