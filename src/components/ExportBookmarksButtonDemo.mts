@@ -1,4 +1,29 @@
-export default class ExportBookmarksButton extends HTMLButtonElement {
+export default class ExportBookmarksButtonDemo extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.shadowRoot!.innerHTML = `
+<div class="export-bookmarks-button-demo">
+    <style>
+        .export-bookmarks-button-demo {
+          background-color: #f0f0f0;
+          padding: 4px;
+          margin: 10px 0;
+        }
+    </style>
+    <p><b>Export Bookmarks Demo</b></p>
+    <button>Export</button>
+</div>
+        `;
+    this.shadowRoot!.querySelector("button")!.addEventListener("click", () => {
+      handleExport();
+    });
+  }
+}
+
+customElements.define("export-bookmarks-button-demo", ExportBookmarksButtonDemo);
+
+export class ExportBookmarksButton extends HTMLButtonElement {
   constructor() {
     super();
     this.style.cursor = "pointer";

@@ -2,6 +2,13 @@
   display: none;
 }
 
+body.options-page {
+  h1 {
+    background: blue;
+    color: white;
+  }
+}
+
 .toast {
     position: absolute;
     top: 0;

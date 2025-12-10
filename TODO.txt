@@ -9,15 +9,11 @@ feature: bookmark title generation. Find bookmarks with short titles and generat
 # simple tasks
 feature: Bookmark backup and restore using storage API
 feature: Arrow navigation for chips
-feature: sort select, default most recent
+feature: sort select, default most recent... bookmarks do not have a last modified date, only folders have dateGroupModified. 
 feature: favicon caching
 bug: null query not handled when multiple characters deleted at once
 
 # learn
 basic bookmark manipulation: flatten, sort, move, delete, rename, create folder, create bookmark
 
-# brainstorm
-tensorflow.js
-Classify bookmarks k means
-Organize classes to tree classes of classes
-Nano names classes
+

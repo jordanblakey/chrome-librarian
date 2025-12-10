@@ -52,3 +52,18 @@ interface RuntimeMessageResponse extends RuntimeMessage {
 interface RuntimeMessagePrompt extends RuntimeMessage {
   streaming?: boolean;
 }
+
+// chrome.bookmarks.BookmarkTreeNode - https://developer.chrome.com/docs/extensions/reference/api/bookmarks/#type-BookmarkTreeNode
+type BookmarkTreeNode = {
+    children?: BookmarkTreeNode[]; // undefined for leaf nodes
+    dateAdded: number; // timestamp of when the node was added
+    dateGroupModified?: number; // timestamp of when the node was last modified
+    id: string; // unique identifier for the node
+    index: number; // index of the node in the parent
+    parentId?: string; // undefined for root nodes
+    syncing: boolean; // true for synced nodes
+    title: string 
+    url?: string; // undefined for folders
+    unmodifiable?: boolean; // true for root nodes
+    folderType?: string; // bookmark_bar, other, 
+}
