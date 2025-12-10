@@ -1,5 +1,16 @@
+export default class BookmarkExporter extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: "open" });
+    }
 
-export class BookmarkExporter {
+    connectedCallback() {
+        this.shadowRoot!.innerHTML = `<button>Export Bookmarks</button>`;
+        this.shadowRoot!.querySelector("button")!.addEventListener("click", () => {
+          this.exportBookmarks();
+        });
+    }
+
     async exportBookmarks() {    
         try {
             const exporter = new BookmarkExporter();
@@ -15,7 +26,6 @@ export class BookmarkExporter {
             console.error("[exportBookmarks] error:", error)
         }
     }
-
     
     async createExportHTML() {
         const tree = await chrome.bookmarks.getTree();
@@ -23,8 +33,7 @@ export class BookmarkExporter {
         const header = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
 <TITLE>Bookmarks</TITLE>
-<H1>Bookmarks</H1>
-`;
+<H1>Bookmarks</H1>`;
         const body = this.recursiveBuild(rootChildren!);
         return new Blob([header, body], { type: 'text/html'})
     }
@@ -54,3 +63,28 @@ export class BookmarkExporter {
             .replace(/'/g, '&#039;');
     }
 }
+
+customElements.define("bookmark-exporter", BookmarkExporter);
+
+
+export class ExportBookmarksButtonDemo extends HTMLElement {
+  bookmarkExporter: BookmarkExporter;
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.shadowRoot!.innerHTML = `<div class="export-bookmarks-button-demo">
+    <style>
+        .export-bookmarks-button-demo {
+          background-color: #f0f0f0;
+          padding: 4px;
+          margin: 10px 0;
+        }
+    </style>
+    <p><b>Export Bookmarks Demo</b></p>
+</div>`;
+    this.bookmarkExporter = new BookmarkExporter();
+    this.shadowRoot?.querySelector('div')?.appendChild(this.bookmarkExporter);
+  }
+}
+
+customElements.define("export-bookmarks-demo", ExportBookmarksButtonDemo);

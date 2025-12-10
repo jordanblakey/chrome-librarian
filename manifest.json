@@ -6,7 +6,8 @@
   "permissions": [
     "bookmarks",
     "commands",
-    "downloads"
+    "downloads",
+    "favicon"
   ],
   "commands": {
     "search": {

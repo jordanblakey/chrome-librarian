@@ -1,3 +1,5 @@
+import { faviconUrl } from "../utils/common.mjs";
+
 export default class BookmarkChips extends HTMLDivElement {
   searchInput: HTMLInputElement;
   constructor() {
@@ -38,7 +40,7 @@ export default class BookmarkChips extends HTMLDivElement {
     const chip = document.createElement('a');
     chip.target = "_blank";
     const favicon = document.createElement('img');
-    favicon.src = `https://www.google.com/s2/favicons?domain=${node.url}&sz=32`;
+    favicon.src = faviconUrl(node.url || '');
     chip.append(favicon);
     chip.classList.add('bookmark-chip');
     chip.title = node.title;

@@ -58,6 +58,7 @@ type BookmarkTreeNode = {
     children?: BookmarkTreeNode[]; // undefined for leaf nodes
     dateAdded: number; // timestamp of when the node was added
     dateGroupModified?: number; // timestamp of when the node was last modified
+    dateLastUsed?: number; // timestamp of when the node was last used
     id: string; // unique identifier for the node
     index: number; // index of the node in the parent
     parentId?: string; // undefined for root nodes

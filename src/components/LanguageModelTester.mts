@@ -1,3 +1,5 @@
+import { toast } from "../utils/common.mjs";
+
 export default class LanguageModelTester extends HTMLElement {
     private isConnected_ = false;
 
@@ -138,7 +140,7 @@ export default class LanguageModelTester extends HTMLElement {
         copyButton.addEventListener("click", () => {
             const text = transcriptDiv.lastChild?.textContent;
             navigator.clipboard.writeText(`${text?.trim() || ""}`);
-            this.toast("Copied!", "success");
+            toast("Copied!", "success");
         });
         newSessionTypeSelect.addEventListener("change", () => this.newSession(newSessionTypeSelect.value as SessionType));
         newSessionButton.addEventListener("click", () => this.newSession(newSessionTypeSelect.value as SessionType));
@@ -187,7 +189,7 @@ export default class LanguageModelTester extends HTMLElement {
         const transcriptMessage = document.createElement("p");
         transcriptMessage.addEventListener("click", () => {
             navigator.clipboard.writeText(transcriptMessage.textContent?.trim() || "");
-            this.toast("Copied!", "success");
+            toast("Copied!", "success");
         });
         transcriptMessage.classList.add("transcript-message", role);
         transcriptMessage.textContent = content;
@@ -233,15 +235,6 @@ export default class LanguageModelTester extends HTMLElement {
 
     getElement<T extends HTMLElement>(id: string): T | null {
         return this.shadowRoot ? this.shadowRoot.getElementById(id) as T : null;
-    }
-
-    toast(message: string, type: "success" | "error" | "warning" | "info") {
-        const toast = document.createElement("div");
-        toast.classList.add("toast");
-        toast.classList.add(type);
-        toast.textContent = message;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 1000);
     }
 }
 
