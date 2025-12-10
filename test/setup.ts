@@ -4,6 +4,9 @@ vi.stubGlobal("chrome", {
   bookmarks: {
     getTree: vi.fn(() => mockBookmarksResponse)
   },
+  runtime: {
+    getURL: vi.fn(() => "chrome-extension://cfjmopenafkbgilpppcnfgajbkheaccn/")
+  } 
 });
 
 const mockBookmarksResponse: chrome.bookmarks.BookmarkTreeNode[] = [
