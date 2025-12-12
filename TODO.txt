@@ -15,5 +15,3 @@ bug: null query not handled when multiple characters deleted at once
 
 # learn
 basic bookmark manipulation: flatten, sort, move, delete, rename, create folder, create bookmark
-
-
