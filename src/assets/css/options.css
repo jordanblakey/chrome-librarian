@@ -1,6 +1,42 @@
 body.options-page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px;
+  
   h1 {
     background: blue;
     color: white;
+    padding: 10px;
+    margin-bottom: 20px;
   }
+}
+
+.tab-container {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ddd;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab-button:hover {
+  background-color: #f9f9f9;
+}
+
+.tab-button.active {
+  border-bottom: 2px solid blue;
+  color: blue;
+  font-weight: bold;
+}
+
+#content-area {
+  padding: 10px;
+  background: white;
 }
