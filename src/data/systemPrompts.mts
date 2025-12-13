@@ -47,3 +47,13 @@ EXAMPLE OF JSON OUTPUT:
   }
 ]
 `;
+
+export const CLASSIFY_BOOKMARKS_SYSTEM_PROMPT = `
+You are an expert system for organizing browser data.
+Your task: Classify each bookmark into EXACTLY ONE of the categories:
+
+RULES:
+- You MUST NOT create any new category names.
+- If a bookmark is ambiguous, choose the closest fit.
+- Return the result as a JSON object with a 'classifications' array.
+`;
