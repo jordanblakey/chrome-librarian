@@ -1,12 +1,15 @@
 import BookmarkManager from "./components/BookmarkManager.mjs";
 import LanguageModelTester from "./components/LanguageModelTester.mjs";
 import BookmarkTitleGeneratorDemo from "./components/BookmarkTitleGeneratorDemo.mjs";
+import BookmarkClassifier from "./components/BookmarkClassifier.mjs";
+
 console.debug("[options] script loaded...");
 
 async function optionsMain() {
-  document.body.appendChild(new BookmarkManager());
-  document.body.appendChild(new BookmarkTitleGeneratorDemo());
-  document.body.appendChild(new LanguageModelTester());
+  document.body.appendChild(new BookmarkClassifier());
+  // document.body.appendChild(new BookmarkManager());
+  // document.body.appendChild(new BookmarkTitleGeneratorDemo());
+  // document.body.appendChild(new LanguageModelTester());
 }
 
 typeof window !== "undefined" && optionsMain();

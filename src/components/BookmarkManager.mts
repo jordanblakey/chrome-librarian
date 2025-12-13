@@ -1,4 +1,5 @@
 import ExportBookmarksButton from "./BookmarkExporter.mjs";
+import { storageOnChanged } from "../utils/common.mjs";
 
 export default class BookmarkManager extends HTMLElement {
   constructor() {
@@ -25,7 +26,7 @@ export default class BookmarkManager extends HTMLElement {
     <div id="snapshots"></div>
 </div>
     `;
-    chrome.storage.onChanged.addListener(this.storageOnChanged);
+    chrome.storage.onChanged.addListener(storageOnChanged);
     this.listSnapshots();
     this.shadowRoot!.querySelector("#create-snapshot")!.addEventListener("click", this.createBookmarkSnapshot.bind(this));
     this.shadowRoot!.querySelector("#clear-snapshots")!.addEventListener("click", this.clearSnapshots.bind(this));
@@ -33,22 +34,10 @@ export default class BookmarkManager extends HTMLElement {
   }
 
   disconnectedCallback() {
-    chrome.storage.onChanged.removeListener(this.storageOnChanged);
+    chrome.storage.onChanged.removeListener(storageOnChanged);
   }
 
-  storageOnChanged(changes: { [key: string]: chrome.storage.StorageChange; }, namespace: string) {
-    const truncate = (val: any) => {
-      const s = JSON.stringify(val);
-      if (!s) return s;
-      return s.length > 100 ? s.substring(0, 100) + "..." : s;
-    };
-    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-      console.log(
-        `[storageOnChanged] Storage key "${key}" in namespace "${namespace}" changed.`,
-        `Old value was "${truncate(oldValue)}", new value is "${truncate(newValue)}".`
-      );
-    }
-  }
+
 
   listSnapshots() {
     chrome.storage.local.get(null, (items) => {

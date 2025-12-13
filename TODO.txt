@@ -1,10 +1,17 @@
 # complex tasks
 feature: create new bookmarks from query and organize them into the existing bookmark structure
-feature: organize existing bookmarks
 feature: 2 stage process: 1. iteratively create tree from chunks of data, then 2. assign links to the tree. This can address Gemini Nano token limitations.
 feature: semantic bookmark search
 
 # simple tasks
+bug: chrome urls blocked from popup
 feature: Arrow navigation for chips
-feature: sort select, default most recent... bookmarks do not have a last modified date, only folders have dateGroupModified. 
-bug: null query not handled when multiple characters deleted at once
+
+feature: given the metadata of all bookmarks, create a list of classifications using LLM
+feature: given the list of classifications, create a folder hierarchy using LLM, max depth 2
+feature: given the folder hierarchy, assign bookmarks to the appropriate folders
+
+feature: within each folder, sort bookmarks by date added by default
+feature: allow sorting by other criteria, e.g. alphabetically
+feature: given a new bookmark, check if there is an appropriate classification, and if so, assign it to the appropriate folder
+feature: given a new bookmark, if there is no appropriate classification, rebuild the folder hierarchy and reassign bookmarks

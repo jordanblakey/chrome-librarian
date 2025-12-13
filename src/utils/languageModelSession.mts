@@ -17,10 +17,7 @@ export async function createLanguageModelSession(
     expectedOutputs: [{ type: "text", languages: languages }] 
   });
 
-  if (availability === "unavailable")
-    throw new Error('Language model "en" unavailable.');
-  
-  console.log("[createLanguageModelSession] availability:", availability);
+  console.debug("[createLanguageModelSession] availability:", availability);
 
   const params = await (globalThis as any).LanguageModel.params();
   const controller = new AbortController();
