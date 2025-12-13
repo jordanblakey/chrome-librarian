@@ -9,6 +9,7 @@ feature: add popup tips for classifier and snapshots
 feature: Arrow navigation for chips
 feature: group search results by domain within category folder
 feature: overflow _more folder for 10+ items in category folder
+feature: hovering bookmark chip shows title, full bookmark path, and url on 3 lines
 
 bug: chrome urls blocked from popup
 bug: success badge missing from category generation

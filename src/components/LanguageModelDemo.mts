@@ -1,6 +1,6 @@
 import { toast } from "../utils/common.mjs";
 
-export default class LanguageModelTester extends HTMLElement {
+export default class LanguageModelDemo extends HTMLElement {
     private isConnected_ = false;
 
     constructor() {
@@ -53,11 +53,11 @@ export default class LanguageModelTester extends HTMLElement {
         <div class="button-row">  
         <label for="new-session-type-select">Session Type:</label>
         <select id="new-session-type-select">
-            <option value="prompt-bookmark-title">Bookmark Title</option>
-            <option value="prompt-text">Text</option>
-            <option value="prompt-basic-json">Basic JSON</option>
-            <option value="prompt-code">Code</option>
-            <option value="prompt-generate-bookmarks-json">Generate Bookmarks JSON</option>
+        <option value="prompt-text">Text</option>
+        <option value="prompt-code">Code</option>
+        <option value="prompt-basic-json">Basic JSON</option>
+        <option value="prompt-bookmark-title">Bookmark Title</option>
+        <option value="prompt-generate-bookmarks-json">Generate Bookmarks JSON</option>
         </select>
         <button id="new-session-button">New Session</button>
         </div>
@@ -238,4 +238,4 @@ export default class LanguageModelTester extends HTMLElement {
     }
 }
 
-customElements.define("language-model-tester", LanguageModelTester);
+customElements.define("language-model-tester", LanguageModelDemo);
