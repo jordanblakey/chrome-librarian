@@ -36,7 +36,12 @@ export default class BookmarkTitleGeneratorDemo extends HTMLElement {
       this.clear();
     });
 
-    const { session, controller } = await createLanguageModelSession(1, 1, ["en"], [{ role: "system", content: "You are a bookmark title generator. Given the text of a webpage, say what it is in 5 words or less. Do not add punctuation or Markdown formatting." }]);
+    const { session, controller } = await createLanguageModelSession(
+      1, 1, ["en"], "text", "text", 
+      [{ 
+        role: "system", 
+        content: "You are a bookmark title generator. Given the text of a webpage, say what it is in 5 words or less. Do not add punctuation or Markdown formatting." 
+      }]);
     this.session = session;
     this.controller = controller;
   }

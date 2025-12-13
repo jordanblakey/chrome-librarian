@@ -5,15 +5,22 @@ export async function createLanguageModelSession(
   tempMult: number = 1.0,
   topKMult: number = 1.0,
   languages: string[] = ["en"],
+  inputModality: string = "text",
+  outputModality: string = "text",
   initialPrompts: Array<{ role: string; content: string; }> = []): Promise<{ session: LanguageModel; controller: AbortController; }> {
   console.debug("[createLanguageModelSession] creation started...");
   const startTime = performance.now();
   const availability: string = await (
     globalThis as any
-  ).LanguageModel.availability({ languages: languages });
+  ).LanguageModel.availability({ 
+    languages: languages, 
+    expectedOutputs: [{ type: "text", languages: languages }] 
+  });
 
   if (availability === "unavailable")
     throw new Error('Language model "en" unavailable.');
+  
+  console.log("[createLanguageModelSession] availability:", availability);
 
   const params = await (globalThis as any).LanguageModel.params();
   const controller = new AbortController();
@@ -23,6 +30,12 @@ export async function createLanguageModelSession(
       temperature: Math.max(params.defaultTemperature * tempMult, 2.0),
       topK: params.defaultTopK * topKMult,
       signal: controller.signal,
+      expectedInputs: [
+        { type: inputModality, languages: languages }
+      ],
+      expectedOutputs: [
+        { type: outputModality, languages: languages }
+      ],
       monitor(m: any) {
         m.addEventListener("downloadprogress", (e: any) => {
           console.debug("[createLanguageModelSession] model download progress " + e.loaded * 100 + "%");
@@ -49,7 +62,7 @@ export async function newSessionFromMessage(message: RuntimeMessage): Promise<Ru
     backgroundState.sessionType = message.sessionType;
     const initialPrompts = [{ role: "system", content: getSystemPrompt(message.sessionType) }];
     // console.debug("[newSessionFromMessage] initialPrompts", initialPrompts);
-    const { session, controller } = await createLanguageModelSession(1, 1, ["en"], initialPrompts);
+    const { session, controller } = await createLanguageModelSession(1, 1, ["en"], 'text', 'text', initialPrompts);
     backgroundState.session = session;
     backgroundState.sessionController = controller;
     chrome.runtime.sendMessage({

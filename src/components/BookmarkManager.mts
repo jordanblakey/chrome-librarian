@@ -7,7 +7,6 @@ export default class BookmarkManager extends HTMLElement {
   }
 
   async connectedCallback() {
-    console.debug("[BookmarkManager] connected");
     this.shadowRoot!.innerHTML = `
 <div class="bookmark-manager">
     <style>
@@ -26,7 +25,7 @@ export default class BookmarkManager extends HTMLElement {
     <div id="snapshots"></div>
 </div>
     `;
-    chrome.storage.onChanged.addListener(this.storageListener);
+    chrome.storage.onChanged.addListener(this.storageOnChanged);
     this.listSnapshots();
     this.shadowRoot!.querySelector("#create-snapshot")!.addEventListener("click", this.createBookmarkSnapshot.bind(this));
     this.shadowRoot!.querySelector("#clear-snapshots")!.addEventListener("click", this.clearSnapshots.bind(this));
@@ -34,11 +33,10 @@ export default class BookmarkManager extends HTMLElement {
   }
 
   disconnectedCallback() {
-    console.debug("[BookmarkManager] disconnected");
-    chrome.storage.onChanged.removeListener(this.storageListener);
+    chrome.storage.onChanged.removeListener(this.storageOnChanged);
   }
 
-  storageListener(changes: { [key: string]: chrome.storage.StorageChange; }, namespace: string) {
+  storageOnChanged(changes: { [key: string]: chrome.storage.StorageChange; }, namespace: string) {
     const truncate = (val: any) => {
       const s = JSON.stringify(val);
       if (!s) return s;
@@ -46,7 +44,7 @@ export default class BookmarkManager extends HTMLElement {
     };
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
       console.log(
-        `Storage key "${key}" in namespace "${namespace}" changed.`,
+        `[storageOnChanged] Storage key "${key}" in namespace "${namespace}" changed.`,
         `Old value was "${truncate(oldValue)}", new value is "${truncate(newValue)}".`
       );
     }

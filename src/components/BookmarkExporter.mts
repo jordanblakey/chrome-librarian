@@ -1,17 +1,23 @@
+import { faviconUrl } from "../utils/common.mjs";
+
 export default class BookmarkExporter extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: "open" });
     }
 
-    connectedCallback() {
+    connectedCallback(): void {
         this.shadowRoot!.innerHTML = `<button>Export Bookmarks</button>`;
         this.shadowRoot!.querySelector("button")!.addEventListener("click", () => {
           this.exportBookmarks();
         });
+
+        // ICON="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADUUlEQVR4nExTXWgcVRQ+59w7s7O72U12U5Mm1FUhpGI0wW7FamttH9QiRQJWsOiLQaGFgIIP+iQRfRMpBrUYFBEfVFAsgn1pKaX/hRTS5qG0aZr+pNvfdJPNZnZ3Zu49PbMJpTMMM/feM9/5zvedo2H5Qnk4/phZ17MByPkIibYgYQERmQhnHKKTaPnnjuNnj8FyMMpPjCsAMF7sTrVD5ltEGvK0coMmLHIMrQUhqQhkL0SCvUsz5c+eunKl3gwZAaBisdvrs5l/2ly9bT4yFhxtkZnAGMFAUCoBqMgQsFrluVQO7X/mkt3ZVTpTV4eFxtftHaNZT79bjkyASpGt1UixxWxnDrxUAi0uCNeGUkkXfAyDx1pUX6PTtLVM3fof8wd3vrTn1+kjr0/MwWLaJfTrmF83wPqDYZzM9gNqC8XWU5CY/QqD+QkmlWTCiK1lK6Abded8sPuP17r0+ulq6C4sYeb5frg78hsOH0jCuYtl0ZG4r7AdfnxnM/fe3gbBvXEE7VmdiByz5OyidM1snG51eF8xpzKhYXdoGIYPpuDo6ZvgsAhhDR6fnIXdf2WhvvoL0OgAmFhRhy3orWSAC0k/hL/7M3hjYA1OC+1zUwuwKufGHslN3J5NwOTVMkyUi0DpDtHXgrFKjuhxMrKg0ML9JMGfL+bBGklg7Yq9yMtvFvdWugWUrJQAxwCKSaS4Lv5AS4S8LxdALX8ZNj2Z5ZuVuBNiIIt3qpF97ok2LObGwTbKlrTHSjcBrgmAPSyOY8wrjJi/v/A7fDkYwODAakmsZFfx9mc78Ju3a2xKeySchJay4CqUsxO49pc310vYSdvsO8Rqw8cXunp5qP89pOAZ0NK0ZT0FUPoOBtUhaeu0FBZyM2NkNjerWjv2xl6VdneFi42GkHGqgd+seU22FQKpouHP8b+9JezJEIeRDZ02TET3w1Hn1dmP4zhcLN37NFqs71dpnRABIaW9yCWXSwsVvjBXgU+6A+7JONgwhE7OTUQV3q+d2c9ZJiUG4NLIGd/3qzvCajjK4oPV7CBYqrPCrTkD73fVFXguuFqHpsI/aYx24MtQkzF5OI0Px7nww5ZNItGHbPiVmoHC2NNL8Fa+fsu3cCClzBhuOH/q0XF+AAAA///2e9V9AAAABklEQVQDADToiU9i+PqDAAAAAElFTkSuQmCC"
+        const url = faviconUrl('https://developer.chrome.com/docs/ai/prompt-api'); 
+        console.log('faviconUrl', url);
     }
 
-    async exportBookmarks() {    
+    async exportBookmarks(): Promise<void> {    
         try {
             const exporter = new BookmarkExporter();
             const blob = await exporter.createExportHTML()
@@ -27,7 +33,7 @@ export default class BookmarkExporter extends HTMLElement {
         }
     }
     
-    async createExportHTML() {
+    async createExportHTML(): Promise<Blob> {
         const tree = await chrome.bookmarks.getTree();
         const rootChildren = tree[0].children;
         const header = `<!DOCTYPE NETSCAPE-Bookmark-file-1>

@@ -1,4 +1,4 @@
-export function faviconUrl(url: string) {
+export function faviconUrl(url: string): string {
   const faviconUrl = new URL(chrome.runtime.getURL("/_favicon/"));
   faviconUrl.searchParams.set("pageUrl", url);
   faviconUrl.searchParams.set("size", "32");
