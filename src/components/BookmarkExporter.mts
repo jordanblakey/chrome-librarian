@@ -1,4 +1,4 @@
-import { faviconUrl } from "../utils/common.mjs";
+import { faviconUrl, imgUrlToDataUrl } from "../utils/common.mjs";
 
 export default class BookmarkExporter extends HTMLElement {
     constructor() {
@@ -8,13 +8,9 @@ export default class BookmarkExporter extends HTMLElement {
 
     connectedCallback(): void {
         this.shadowRoot!.innerHTML = `<button>Export Bookmarks</button>`;
-        this.shadowRoot!.querySelector("button")!.addEventListener("click", () => {
-          this.exportBookmarks();
+        this.shadowRoot!.querySelector("button")!.addEventListener("click", async () => {
+          await this.exportBookmarks();
         });
-
-        // ICON="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAADUUlEQVR4nExTXWgcVRQ+59w7s7O72U12U5Mm1FUhpGI0wW7FamttH9QiRQJWsOiLQaGFgIIP+iQRfRMpBrUYFBEfVFAsgn1pKaX/hRTS5qG0aZr+pNvfdJPNZnZ3Zu49PbMJpTMMM/feM9/5zvedo2H5Qnk4/phZ17MByPkIibYgYQERmQhnHKKTaPnnjuNnj8FyMMpPjCsAMF7sTrVD5ltEGvK0coMmLHIMrQUhqQhkL0SCvUsz5c+eunKl3gwZAaBisdvrs5l/2ly9bT4yFhxtkZnAGMFAUCoBqMgQsFrluVQO7X/mkt3ZVTpTV4eFxtftHaNZT79bjkyASpGt1UixxWxnDrxUAi0uCNeGUkkXfAyDx1pUX6PTtLVM3fof8wd3vrTn1+kjr0/MwWLaJfTrmF83wPqDYZzM9gNqC8XWU5CY/QqD+QkmlWTCiK1lK6Abded8sPuP17r0+ulq6C4sYeb5frg78hsOH0jCuYtl0ZG4r7AdfnxnM/fe3gbBvXEE7VmdiByz5OyidM1snG51eF8xpzKhYXdoGIYPpuDo6ZvgsAhhDR6fnIXdf2WhvvoL0OgAmFhRhy3orWSAC0k/hL/7M3hjYA1OC+1zUwuwKufGHslN3J5NwOTVMkyUi0DpDtHXgrFKjuhxMrKg0ML9JMGfL+bBGklg7Yq9yMtvFvdWugWUrJQAxwCKSaS4Lv5AS4S8LxdALX8ZNj2Z5ZuVuBNiIIt3qpF97ok2LObGwTbKlrTHSjcBrgmAPSyOY8wrjJi/v/A7fDkYwODAakmsZFfx9mc78Ju3a2xKeySchJay4CqUsxO49pc310vYSdvsO8Rqw8cXunp5qP89pOAZ0NK0ZT0FUPoOBtUhaeu0FBZyM2NkNjerWjv2xl6VdneFi42GkHGqgd+seU22FQKpouHP8b+9JezJEIeRDZ02TET3w1Hn1dmP4zhcLN37NFqs71dpnRABIaW9yCWXSwsVvjBXgU+6A+7JONgwhE7OTUQV3q+d2c9ZJiUG4NLIGd/3qzvCajjK4oPV7CBYqrPCrTkD73fVFXguuFqHpsI/aYx24MtQkzF5OI0Px7nww5ZNItGHbPiVmoHC2NNL8Fa+fsu3cCClzBhuOH/q0XF+AAAA///2e9V9AAAABklEQVQDADToiU9i+PqDAAAAAElFTkSuQmCC"
-        const url = faviconUrl('https://developer.chrome.com/docs/ai/prompt-api'); 
-        console.log('faviconUrl', url);
     }
 
     async exportBookmarks(): Promise<void> {    
@@ -40,23 +36,38 @@ export default class BookmarkExporter extends HTMLElement {
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
 <TITLE>Bookmarks</TITLE>
 <H1>Bookmarks</H1>`;
-        const body = this.recursiveBuild(rootChildren!);
+        const t1 = performance.now();
+        const body = await this.recursiveBuild(rootChildren!);
+        console.debug(`[createExportHTML] recursiveBuild took ${performance.now() - t1}ms`);
         return new Blob([header, body], { type: 'text/html'})
     }
 
-    recursiveBuild(nodes: chrome.bookmarks.BookmarkTreeNode[]): string {
+    async recursiveBuild(nodes: chrome.bookmarks.BookmarkTreeNode[]): Promise<string> {
         if (!nodes || nodes.length === 0) return '';
+        
         let html = '<DL><p>\n';
-        nodes.forEach(node => {
+        const titleCounts = new Map<string, number>();
+
+        for (const node of nodes) {
+            let title = node.title;
+            if (titleCounts.has(title)) {
+                const count = titleCounts.get(title)! + 1;
+                titleCounts.set(title, count);
+                title = `${title} (${count})`;
+            } else {
+                titleCounts.set(title, 1);
+            }
+
             const dateAdded = node.dateAdded ? Math.floor(node.dateAdded / 1000) : 0;
             if (node.url) {
-                html += `    <DT><A HREF="${node.url}" ADD_DATE="${dateAdded}">${node.title}</A>\n`
+                const pngDataUrl = await imgUrlToDataUrl(faviconUrl(node.url));
+                html += `    <DT><A HREF="${node.url}" ADD_DATE="${dateAdded}" ICON="${pngDataUrl}">${this.escapeHtml(title)}</A>\n`;
             } else {
                 const lastModified = node.dateGroupModified ? Math.floor(node.dateGroupModified / 1000) : 0;
-                html += `    <DT><H3 ADD_DATE="${dateAdded}" LAST_MODIFIED="${lastModified}">${this.escapeHtml(node.title)}</H3>\n`
-                html += this.recursiveBuild(node.children!);
+                html += `    <DT><H3 ADD_DATE="${dateAdded}" LAST_MODIFIED="${lastModified}">${this.escapeHtml(title)}</H3>\n`;
+                html += await this.recursiveBuild(node.children!);
             }
-        })
+        }
         html += '</DL><p>\n';
         return html;
     }

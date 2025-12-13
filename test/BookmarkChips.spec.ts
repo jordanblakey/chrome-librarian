@@ -1,6 +1,23 @@
 import { describe, expect, test, vi } from "vitest";
 import BookmarkChips from "../src/components/BookmarkChips.mts";
 
+const mockBookmarksResponse: chrome.bookmarks.BookmarkTreeNode[] = [
+    {
+        id: '0',
+        title: '',
+        syncing: false,
+        children: [
+            {
+                id: '1',
+                title: 'Test Bookmark',
+                url: 'https://example.com',
+                parentId: '0',
+                syncing: false
+            }
+        ]
+    }
+];
+
 describe("BookmarkChips", () => {
     test("creates instance of BookmarkChips", () => {
       const div = document.createElement("input");
@@ -11,6 +28,7 @@ describe("BookmarkChips", () => {
     });
 
     test("chrome.bookmarks.getTree mock returns tree", async () => {
+      chrome.bookmarks.getTree = vi.fn().mockResolvedValue(mockBookmarksResponse);
       const prevCallCount = vi.mocked(chrome.bookmarks.getTree).mock.calls.length;
       const tree = await chrome.bookmarks.getTree()
       expect(chrome.bookmarks.getTree)
@@ -23,6 +41,7 @@ describe("BookmarkChips", () => {
       const div = document.createElement("input");
       div.id = "bookmark-search-bar";
       document.body.appendChild(div);
+      chrome.bookmarks.getTree = vi.fn().mockResolvedValue(mockBookmarksResponse);
       const bookmarkChips = new BookmarkChips();
       await new Promise(resolve => setTimeout(resolve, 0));
       bookmarkChips.searchInput.focus();
