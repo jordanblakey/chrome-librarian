@@ -1,8 +1,9 @@
-import { CLASSIFY_BOOKMARKS_SYSTEM_PROMPT } from "../data/systemPrompts.mjs";
-import { BOOKMARK_CLASSIFICATION_JSON_SCHEMA } from "../data/responseConstraintSchemas.mjs";
+import { CLASSIFY_BOOKMARKS_SYSTEM_PROMPT, GENERATE_CATEGORIES_SYSTEM_PROMPT } from "../data/systemPrompts.mjs";
+import { BOOKMARK_CLASSIFICATION_JSON_SCHEMA, GENERATE_CATEGORIES_JSON_SCHEMA, createClassificationSchema } from "../data/responseConstraintSchemas.mjs";
+import { showBadgeError, showBadgeSuccess, startExtensionSpinner, getWeightedSample } from "../utils/common.mjs";
 
 // --- CONFIGURATION ---
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 10;
 
 
 export default class BookmarkClassifier extends HTMLElement {
@@ -18,6 +19,9 @@ export default class BookmarkClassifier extends HTMLElement {
     // Store the hierarchy from Step 2
     private folderHierarchy: any = null;
 
+    // Active Classification Schema (Default or Generated)
+    private activeSchema: any = BOOKMARK_CLASSIFICATION_JSON_SCHEMA;
+
 
     constructor() {
         super();
@@ -28,6 +32,11 @@ export default class BookmarkClassifier extends HTMLElement {
         this.createFolderHierarchy = this.createFolderHierarchy.bind(this);
         this.clearClassifications = this.clearClassifications.bind(this);
         this.assignBookmarksToFolders = this.assignBookmarksToFolders.bind(this);
+        this.createClassifications = this.createClassifications.bind(this);
+        this.createFolderHierarchy = this.createFolderHierarchy.bind(this);
+        this.clearClassifications = this.clearClassifications.bind(this);
+        this.assignBookmarksToFolders = this.assignBookmarksToFolders.bind(this);
+        this.generateNovelSchema = this.generateNovelSchema.bind(this);
     }
 
     // ... (connectedCallback and disconnectedCallback remain the same)
@@ -52,6 +61,7 @@ export default class BookmarkClassifier extends HTMLElement {
     <p><b>Bookmark Classifier</b></p>
     <p>Create a folder hierarchy based on the metadata of all bookmarks.</p>
     <div id="button-bar">
+      <button id="generate-novel-schema">0. Generate Categories</button>
       <button id="create-classifications">1. Create Classifications</button>
       <button id="create-hierarchy" disabled>2. Create Hierarchy</button>
       <button id="assign-folders" disabled>3. Assign Bookmarks</button>
@@ -64,7 +74,21 @@ export default class BookmarkClassifier extends HTMLElement {
         this.shadowRoot!.querySelector("#create-classifications")!.addEventListener("click", this.createClassifications);
         this.shadowRoot!.querySelector("#clear-classifications")!.addEventListener("click", this.clearClassifications);
         this.shadowRoot!.querySelector("#create-hierarchy")!.addEventListener("click", this.createFolderHierarchy);
+        this.shadowRoot!.querySelector("#create-classifications")!.addEventListener("click", this.createClassifications);
+        this.shadowRoot!.querySelector("#clear-classifications")!.addEventListener("click", this.clearClassifications);
+        this.shadowRoot!.querySelector("#create-hierarchy")!.addEventListener("click", this.createFolderHierarchy);
         this.shadowRoot!.querySelector("#assign-folders")!.addEventListener("click", this.assignBookmarksToFolders);
+        this.shadowRoot!.querySelector("#generate-novel-schema")!.addEventListener("click", () => {
+             // Wrapper to fetch current bookmarks
+             chrome.bookmarks.getTree().then(tree => {
+                const nodes = getWeightedSample(tree, 100); // Pass a sample or full tree? The method takes array
+                // actually getWeightedSample takes tree but generateNovelSchema takes array, wait generateNovelSchema calls getWeightedSample internally
+                // Let's re-read generateNovelSchema signature -> it takes bookmarks: BookmarkTreeNode[]
+                // It calls getWeightedSample(bookmarks, 50). 
+                // chrome.bookmarks.getTree() returns [root]. 
+                this.generateNovelSchema(tree); 
+             });
+        });
     }
     
     // --- UTILITY METHODS ---
@@ -78,20 +102,86 @@ export default class BookmarkClassifier extends HTMLElement {
     }
     
     // ----------------------------------------------------------------------
+    // STEP 0: NOVEL CATEGORY GENERATION (Optional)
+    // ----------------------------------------------------------------------
+
+    async generateNovelSchema(bookmarks: chrome.bookmarks.BookmarkTreeNode[]) {
+        this.updateStatus("Status: Sampling bookmarks to generate novel categories...");
+        const stopSpinner = startExtensionSpinner();
+        const startTime = performance.now();
+
+        try {
+            // 1. Get a weighted sample of bookmarks (e.g., 50 items)
+            // Note: bookmarks input is the Tree Root Array from getTree()
+            const sample = getWeightedSample(bookmarks, 50);
+            
+            // 2. Format for the prompt
+            const sampleText = sample.map(n => n.url ? `Bookmark: ${n.title} (${n.url})` : `Folder: ${n.title}`).join('\n');
+
+            // 3. Prompt the LLM
+            const session = await (globalThis as any).LanguageModel.create({
+                systemPrompt: GENERATE_CATEGORIES_SYSTEM_PROMPT,
+                expectedOutputs: [{ type: "text", languages: ["en"], schema: GENERATE_CATEGORIES_JSON_SCHEMA }]
+            });
+
+            const prompt = `Here is a sample of my bookmarks. detailed list:\n${sampleText}`;
+            const result = await session.prompt(prompt, {
+                responseConstraint: GENERATE_CATEGORIES_JSON_SCHEMA
+            });
+            console.log("Novel Categories Raw Result:", result);
+
+            const parsed = JSON.parse(result);
+            const newCategories = parsed.categories;
+            
+            if (!newCategories || !Array.isArray(newCategories) || newCategories.length === 0) {
+                throw new Error("Failed to generate categories from sample.");
+            }
+
+            this.updateStatus(`Generated ${newCategories.length} novel categories!`);
+            
+            // 4. Return the new Schema
+            const totalTime = performance.now() - startTime;
+            this.updateStatus(`Generated ${newCategories.length} novel categories | Time: ${(totalTime / 1000).toFixed(2)}s`);
+            this.displayResults(newCategories, "Novel Categories");
+            
+            // 4. Update the Active Schema
+            this.activeSchema = createClassificationSchema(newCategories);
+            return this.activeSchema;
+
+        } catch (error) {
+            console.error("Error generating novel schema:", error);
+            this.updateStatus(`Error generating categories: ${error}`);
+            // Fallback to default schema if generation fails
+            return BOOKMARK_CLASSIFICATION_JSON_SCHEMA;
+        } finally {
+            stopSpinner();
+        }
+    }
+
+    // ----------------------------------------------------------------------
     // STEP 1: CLASSIFICATION (Batched for Performance)
     // ----------------------------------------------------------------------
 
     async createClassifications() {
         this.allClusteredData = []; // Reset old data
         this.updateStatus("Status: Fetching bookmarks and starting batch classification...");
+        
+        // Start Spinner Animation
+        const stopSpinner = startExtensionSpinner();
+
+        const startTime = performance.now();
+        const batchDurations: number[] = [];
 
         let session: any; 
         
         try {
-            // 1. Create a single LLM session
-            session = await (globalThis as any).LanguageModel.create(
-                {expectedOutputs: [{ type: "text", languages: ["en"]}]}
-            );
+            // 1. Create a BASE LLM session with the System Prompt
+            // We will CLONE this for every batch to ensure we have a FRESH context (no history bloat)
+            // but we still get the benefit of caching the System Prompt processing.
+            session = await (globalThis as any).LanguageModel.create({
+                systemPrompt: CLASSIFY_BOOKMARKS_SYSTEM_PROMPT, // Pre-load system prompt
+                expectedOutputs: [{ type: "text", languages: ["en"] }]
+            });
             
             // 2. Prepare and chunk all bookmark data
             // We ensure strict ID mapping between Prompt and Map
@@ -104,12 +194,23 @@ export default class BookmarkClassifier extends HTMLElement {
                 for (const node of nodes) {
                     if (node.url) {
                         const content = `${node.title} (${node.url})`;
-                        // Fix: Deduplicate bookmarks. If we see the same Title+URL pair, skip it.
                         if (!seenContent.has(content)) {
                             seenContent.add(content);
                             const id = String(idCounter++);
                             this.originalBookmarksMap.set(id, node);
-                            bookmarksFlat.push(`[${id}] ${content}`); // Send ID in the prompt
+
+                            // OPTIMIZATION: Ultra-Aggressive Token Scrubbing
+                            // 1. Strip Protocol & WWW (https://www. -> 0 tokens)
+                            // 2. Truncate Title (keep first 30 chars)
+                            // 3. Truncate URL (keep first 40 chars)
+                            let cleanUrl = node.url.replace(/^(https?:\/\/)?(www\.)?/, '');
+                            if (cleanUrl.length > 40) cleanUrl = cleanUrl.substring(0, 37) + "...";
+                            
+                            let cleanTitle = node.title.trim();
+                            if (cleanTitle.length > 30) cleanTitle = cleanTitle.substring(0, 27) + "...";
+
+                            // Compact format: "[ID] Title (URL)" -> "[1]React Docs(react.dev)"
+                            bookmarksFlat.push(`[${id}]${cleanTitle}(${cleanUrl})`);
                         }
                     }
                     if (node.children) {
@@ -123,7 +224,7 @@ export default class BookmarkClassifier extends HTMLElement {
             
             this.updateStatus(`Found ${bookmarksFlat.length} bookmarks. Processing in ${chunks.length} batches.`);
 
-            // 3. Process each chunk in a loop
+            // 3. Process each chunk sequentially (GPU limits parallelism)
             for (let i = 0; i < chunks.length; i++) {
                 const chunk = chunks[i];
                 const currentBatch = i + 1;
@@ -131,45 +232,89 @@ export default class BookmarkClassifier extends HTMLElement {
                 const userPrompt = `
 Classify the following bookmarks.
 Input format: [ID] Title (URL)
-Return JSON with 'id' and 'cluster_name' (must be one of the 25 allowed categories).
+Return JSON with a 'classifications' array of strings.
+Format each string EXACTLY as: "ID:CategoryName"
 (Batch ${currentBatch}/${chunks.length}):
 ${chunk.join('\n')}
 `;
-
+                let batchSession: any;
+                const batchStartTime = performance.now();
                 try {
-                    this.updateStatus(`Processing Batch ${currentBatch} (${chunk.length} items)...`);
+                    let statusMsg = `Processing Batch ${currentBatch} (${chunk.length} items)...`;
+                    if (batchDurations.length > 0) {
+                        const lastDuration = batchDurations[batchDurations.length - 1];
+                        statusMsg += ` (Last Batch: ${(lastDuration / 1000).toFixed(2)}s)`;
+                    }
+                    this.updateStatus(statusMsg);
 
-                    const result = await session.prompt(userPrompt, { 
-                        systemInstruction: CLASSIFY_BOOKMARKS_SYSTEM_PROMPT,
-                        responseConstraint: BOOKMARK_CLASSIFICATION_JSON_SCHEMA,
-                        temperature: 0.2
+                    // CLONE the base session. 
+                    // This gives us a session with the System Prompt already digested, but NO history from previous batches.
+                    batchSession = await session.clone();
+
+
+                    const result = await batchSession.prompt(userPrompt, { 
+                        // systemInstruction is already in the base session
+                        responseConstraint: this.activeSchema,
+                        temperature: 0.2 // Low temperature for deterministic speed
                     });
                     
                     const parsedResult = JSON.parse(result);
-                    // Handle new schema structure: { classifications: [...] }
-                    const clusteredData = (parsedResult.classifications || []).map((c: any) => ({
-                        id: c.id, 
-                        cluster_name: c.cluster_name.trim() 
-                    }));
+                    
+                    // Handle Compact Schema: ["ID:Category", ...]
+                    const clusteredData: { id: string, cluster_name: string }[] = [];
+                    
+                    for (const itemStr of (parsedResult.classifications || [])) {
+                        const parts = itemStr.split(":");
+                        if (parts.length >= 2) {
+                            const id = parts[0].trim();
+                            // Join rest in case category has colon (unlikely but safe)
+                            const cluster_name = parts.slice(1).join(":").trim();
+                            clusteredData.push({ id, cluster_name });
+                        }
+                    }
+
                     this.allClusteredData.push(...clusteredData);
+                    
+                    const batchEndTime = performance.now();
+                    const duration = batchEndTime - batchStartTime;
+                    batchDurations.push(duration);
                     
                 } catch (error) {
                     console.error(`[bookmark-classifier] Error processing Batch ${currentBatch}:`, error);
                     this.updateStatus(`Error in Batch ${currentBatch}. Check console.`);
-                    // Decide whether to break here or continue
+                } finally {
+                    // CRITICAL: Destroy the temporary session to free resources immediately
+                    if (batchSession) {
+                        try {
+                            batchSession.destroy();
+                        } catch (e) { /* ignore */ }
+                    }
                 }
             }
             
-            this.updateStatus(`Classification complete. ${this.allClusteredData.length} items classified.`);
+            const totalTime = performance.now() - startTime;
+            const avgBatchTime = batchDurations.reduce((a, b) => a + b, 0) / batchDurations.length || 0;
+            
+            this.updateStatus(`Classification complete | Input: ${this.originalBookmarksMap.size} | Organized: ${this.allClusteredData.length} | Total Time: ${(totalTime / 1000).toFixed(2)}s | Avg Batch: ${(avgBatchTime / 1000).toFixed(2)}s`);
+            
             this.displayResults(this.allClusteredData);
             this.shadowRoot!.querySelector("#create-hierarchy")!.removeAttribute("disabled");
-            
+
+            stopSpinner();
+            showBadgeSuccess();
+
             return this.allClusteredData;
 
         } catch (error) {
             this.updateStatus(`Fatal Error: ${error}. Check console.`);
+
+            stopSpinner();
+            showBadgeError();
+
             return null; 
         } finally {
+            setTimeout(() => { chrome.action.setBadgeText({ text: "" }); }, 10000);
+            
             if (session && typeof session.destroy === 'function') {
                 await session.destroy();
             }
@@ -190,12 +335,23 @@ ${chunk.join('\n')}
         // Since Step 1 is now strictly 5 broad categories, we don't need AI for Step 2.
         // The AI was hallucinating sub-folders that didn't exist in the data.
         // We will simply create a flat hierarchy of the unique categories we found.
-        const uniqueClusters = Array.from(new Set(this.allClusteredData.map(item => item.cluster_name)));
+        // Count bookmarks per category for display
+        const counts: Record<string, number> = {};
+        for (const item of this.allClusteredData) {
+            counts[item.cluster_name] = (counts[item.cluster_name] || 0) + 1;
+        }
         
-        const folderHierarchy: { [key: string]: string[] } = {};
-        uniqueClusters.forEach(cluster => {
-            folderHierarchy[cluster] = []; // No sub-folders, just Top Level
-        });
+        // Save to hierarchy (Value is count, or could be array of IDs, but count is what UI wants)
+        // We type cast to any to be flexible, but downstream `assignBookmarksToFolders` only initializes folders if value is Array
+        // so setting it to a number is safe (it just won't make subfolders, which is correct).
+        const folderHierarchy: any = {};
+        
+        // Sort by count descending
+        Object.entries(counts)
+            .sort(([,a], [,b]) => b - a)
+            .forEach(([cluster, count]) => {
+                folderHierarchy[cluster] = `${count} bookmarks`;
+            });
 
         this.folderHierarchy = folderHierarchy; // Save for Step 3
         

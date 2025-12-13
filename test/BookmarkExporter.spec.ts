@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import BookmarkExporter from './BookmarkExporter.mjs';
+import BookmarkExporter from '../src/components/BookmarkExporter.mjs';
 
 // Mock dependencies
-vi.mock('../utils/common.mjs', () => ({
+vi.mock('../src/utils/common.mjs', () => ({
   faviconUrl: (url: string) => `favicon:${url}`,
   imgUrlToDataUrl: async (url: string) => `data:${url}`,
 }));

@@ -4,10 +4,17 @@ feature: 2 stage process: 1. iteratively create tree from chunks of data, then 2
 feature: semantic bookmark search
 
 # simple tasks
-bug: chrome urls blocked from popup
-feature: Arrow navigation for chips
+Tabs for popup: search, snapshots
+feature: Snapshots - an immutable list of bookmarks snapshots that can be restored on demand. 
+These span the installation lifecycle of the extension.
 
-feature: given the metadata of all bookmarks, create a list of classifications using LLM
+feature: Arrow navigation for chips
+feature: search shows # of results
+feature: group search results by domain within category folder
+feature: overflow _more folder for 10+ items in category folder
+bug: chrome urls blocked from popup
+
+feature: given the metadata of all bookmarks, create a list of novel classifications using LLM. This could be based on a random sample of bookmarks from a flattened list.
 feature: given the list of classifications, create a folder hierarchy using LLM, max depth 2
 feature: given the folder hierarchy, assign bookmarks to the appropriate folders
 

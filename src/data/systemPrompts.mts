@@ -57,3 +57,14 @@ RULES:
 - If a bookmark is ambiguous, choose the closest fit.
 - Return the result as a JSON object with a 'classifications' array.
 `;
+
+export const GENERATE_CATEGORIES_SYSTEM_PROMPT = `
+You are an expert librarian and taxonomist.
+Your task: Analyze the provided sample of bookmarks (Titles and URLs) and generate a list of 15-25 concise, mutually exclusive categories that best organize them.
+
+RULES:
+- Focusing on the CONTENT of the bookmarks, create broad but distinct categories.
+- Avoid generic buckets like "Other" or "Misc" unless absolutely necessary.
+- Return the result as a JSON object with a single 'categories' array containing the string names.
+- Examples of good ecosystem categories: "Development", "Cooking & Food", "Finance", "News", "Entertainment".
+`;

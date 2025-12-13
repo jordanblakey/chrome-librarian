@@ -5,24 +5,6 @@ export function faviconUrl(url: string): string {
   return faviconUrl.toString();
 }
 
-export function countBookmarks(nodes: chrome.bookmarks.BookmarkTreeNode[]): number {
-    let count = 0;
-    for (const node of nodes) {
-        if (node.url) count++;
-        if (node.children) count += countBookmarks(node.children);
-    }
-    return count;
-}
-
-export function listBookmarksFlat(nodes: chrome.bookmarks.BookmarkTreeNode[]): string[] {
-    const list: string[] = [];
-    for (const node of nodes) {
-        if (node.url) list.push(`${node.title} (${node.url})`);
-        if (node.children) list.push(...listBookmarksFlat(node.children));
-    }
-    return list;
-}
-
 export async function imgUrlToDataUrl(url: string): Promise<string> {
   const response = await fetch(url);
   if (!response.ok) {
@@ -67,3 +49,102 @@ export function storageOnChanged(changes: { [key: string]: chrome.storage.Storag
     );
   }
 }
+
+/**
+ * Recursively retrieves all nodes of a specific type (bookmark or folder) from the tree.
+ */
+export function getNodes(nodes: chrome.bookmarks.BookmarkTreeNode[], type: "bookmark" | "folder"): chrome.bookmarks.BookmarkTreeNode[] {
+    const list: chrome.bookmarks.BookmarkTreeNode[] = [];
+    for (const node of nodes) {
+        const isBookmark = !!node.url;
+        // Folders are nodes without URL. 
+        if ((type === "bookmark" && isBookmark) || (type === "folder" && !isBookmark)) {
+            list.push(node);
+        }
+        if (node.children) {
+            list.push(...getNodes(node.children, type));
+        }
+    }
+    return list;
+}
+
+/**
+ * Returns a random sample of `n` nodes of a specific type from the given tree.
+ */
+export function getRandomSample(nodes: chrome.bookmarks.BookmarkTreeNode[], n: number, type: "bookmark" | "folder"): chrome.bookmarks.BookmarkTreeNode[] {
+    const allNodes = getNodes(nodes, type);
+    
+    // Shuffle using Fisher-Yates algorithm
+    for (let i = allNodes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allNodes[i], allNodes[j]] = [allNodes[j], allNodes[i]];
+    }
+    
+    return allNodes.slice(0, n);
+}
+
+/**
+ * Returns a weighted random sample of `n` nodes from the tree.
+ * Folders (nodes without URL) are given 2x weight compared to Bookmarks.
+ */
+export function getWeightedSample(nodes: chrome.bookmarks.BookmarkTreeNode[], n: number): chrome.bookmarks.BookmarkTreeNode[] {
+    const folders = getNodes(nodes, "folder");
+    const bookmarks = getNodes(nodes, "bookmark");
+    
+    // Create a pool where each item has a weight
+    // We can't use simple array duplication for large sets efficiently, so we use weighted selection.
+    let pool = [
+        ...folders.map(f => ({ node: f, weight: 2 })),
+        ...bookmarks.map(b => ({ node: b, weight: 1 }))
+    ];
+
+    const result: chrome.bookmarks.BookmarkTreeNode[] = [];
+    const count = Math.min(n, pool.length);
+
+    for (let i = 0; i < count; i++) {
+         const totalWeight = pool.reduce((sum, item) => sum + item.weight, 0);
+         let r = Math.random() * totalWeight;
+         
+         const index = pool.findIndex(item => {
+             r -= item.weight;
+             return r <= 0;
+         });
+         
+         if (index !== -1) {
+             result.push(pool[index].node);
+             // Remove from pool to avoid duplicates
+             pool.splice(index, 1);
+         }
+    }
+    return result;
+}
+
+/**
+ * Returns a cleanup function that stops the spinner.
+ */
+export function startExtensionSpinner(): () => void {
+    const spinnerFrames = ['⬅', '⬉', '⬆', '⬈', '➡', '⬊', '⬇', '⬋'];
+    let spinnerIdx = 0;
+    chrome.action.setBadgeTextColor({ color: "rgb(255, 255, 255)" });
+    chrome.action.setBadgeBackgroundColor({ color: "rgb(254, 178, 26)" });
+    
+    const intervalId = setInterval(() => {
+        chrome.action.setBadgeText({ text: spinnerFrames[spinnerIdx] });
+        spinnerIdx = (spinnerIdx + 1) % spinnerFrames.length;
+    }, 150);
+
+    return () => clearInterval(intervalId);
+}
+
+export function showBadgeSuccess() {
+    chrome.action.setBadgeText({ text: "✔" });
+    chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
+    chrome.action.setBadgeTextColor({ color: "#FFFFFF" });
+}
+
+export function showBadgeError() {
+    chrome.action.setBadgeText({ text: "❌" });
+    chrome.action.setBadgeBackgroundColor({ color: "#F44336" });
+    chrome.action.setBadgeTextColor({ color: "#FFFFFF" });
+}
+    
