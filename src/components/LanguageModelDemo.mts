@@ -37,40 +37,42 @@ export default class LanguageModelDemo extends HTMLElement {
 
     private get template(): string {
         return `
-<div class="language-model-tester">
-    <link rel="stylesheet" href="../../assets/css/LanguageModelTester.css">
-    <p><b>Language Model Tester</b></p>
-    <div class="input-group">
-        <textarea name="prompt-input" id="prompt-input" placeholder="prompt Gemini Nano..." class="auto-resize"></textarea>
-        <div class="button-row">
-        <button id="prompt-button">Prompt</button>
-        <input type="checkbox" id="streaming-checkbox" checked>
-        <label for="streaming-checkbox">Streaming</label>
-        <button id="stop-response-button">Stop Response</button>
-        <button id="copy-button">Copy Response</button>
-        <span id="token-estimate">Token estimate: 0</span>
-        </div>
-        <div class="button-row">  
-        <label for="new-session-type-select">Session Type:</label>
-        <select id="new-session-type-select">
-        <option value="prompt-text">Text</option>
-        <option value="prompt-code">Code</option>
-        <option value="prompt-basic-json">Basic JSON</option>
-        <option value="prompt-bookmark-title">Bookmark Title</option>
-        <option value="prompt-generate-bookmarks-json">Generate Bookmarks JSON</option>
-        </select>
-        <button id="new-session-button">New Session</button>
-        </div>
-    </div>
-    <div class="output-group">
-        <p><b>Transcript:</b> <span id="response-status"></span></p>
-        <div id="transcript-div"></div>
-        <p><b>Prompt Stats:</b></p>
-        <pre id="stats-div"></pre>
-        <p><b>Session Stats:</b></p>
-        <pre id="session-stats-div"></pre>
-    </div>
-</div>
+            <div class="language-model-demo card">
+                <link rel="stylesheet" href="../../assets/css/components.css">
+                <p><b>Language Model Demo</b></p>
+                <div class="input-group">
+                    <textarea name="prompt-input" id="prompt-input" placeholder="prompt Gemini Nano..." class="auto-resize"></textarea>
+                    <div class="button-row">
+                    <button id="prompt-button">Prompt</button>
+                    <span class="checkbox-group">
+                        <input type="checkbox" id="streaming-checkbox" checked>
+                        <label for="streaming-checkbox">Streaming</label>
+                    </span>
+                    <button id="stop-response-button">Stop Response</button>
+                    <button id="copy-button">Copy Response</button>
+                    <span id="token-estimate">Token estimate: 0</span>
+                    </div>
+                    <div class="button-row">  
+                    <label for="new-session-type-select">Session Type:</label>
+                    <select id="new-session-type-select">
+                    <option value="prompt-text">Text</option>
+                    <option value="prompt-code">Code</option>
+                    <option value="prompt-basic-json">Basic JSON</option>
+                    <option value="prompt-bookmark-title">Bookmark Title</option>
+                    <option value="prompt-generate-bookmarks-json">Generate Bookmarks JSON</option>
+                    </select>
+                    <button id="new-session-button">New Session</button>
+                    </div>
+                </div>
+                <div class="output-group">
+                    <p><b>Transcript:</b> <span id="response-status"></span></p>
+                    <div id="transcript-div"></div>
+                    <p><b>Prompt Stats:</b></p>
+                    <pre id="stats-div"></pre>
+                    <p><b>Session Stats:</b></p>
+                    <pre id="session-stats-div"></pre>
+                </div>
+            </div>
     `;
     }
 
@@ -92,7 +94,7 @@ export default class LanguageModelDemo extends HTMLElement {
         this.isShiftDown = false;
 
         if (!promptInput || !promptButton || !streamingCheckbox || !stopResponseButton || !copyButton || !newSessionTypeSelect || !newSessionButton || !transcriptDiv || !responseStatus) {
-            console.error("LanguageModelTester: Could not find one or more required elements.");
+            console.error("LanguageModelDemo: Could not find one or more required elements.");
             return;
         }
 

@@ -26,7 +26,6 @@ feature: overflow _more folder for 10+ items in category folder
 
 # very simple tasks
 ux: popup - nav to classifier, snapshots, demos. make search more spacious
-ux: popup - add popup tips concerning classifier and snapshots
 ux: popup - hovering bookmark chip shows title, full bookmark path, and url on 3 lines
 ux: popup - search shows # of results
 ux: options - copy consistency around snapshots (backups?)

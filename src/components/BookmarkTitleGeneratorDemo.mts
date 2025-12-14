@@ -10,25 +10,17 @@ export default class BookmarkTitleGeneratorDemo extends HTMLElement {
   }
 
   async connectedCallback() {
-    this.shadowRoot!.innerHTML = `<div class="bookmark-title-generator-demo">
-        <style>
-            .bookmark-title-generator-demo {
-              background-color: #f0f0f0;
-              padding: 4px;
-              margin: 10px 0;
-            }
-            .bookmark-title-generator-demo img {
-              width: 16px;
-              height: 16px;
-              margin-right: 4px;
-            }
-        </style>
-        <p><b>Bookmark Title Generator Demo</b></p>
-        <p>Generate Bookmarks Titles from 5 random Wikipedia pages</p>
-        <button id="generate-button">Generate</button>
-        <button id="clear-button">Clear</button>
-        <div id="output"></div>
-    </div>`;
+    this.shadowRoot!.innerHTML = `
+      <div class="bookmark-title-generator-demo card">
+          <link rel="stylesheet" href="../../assets/css/components.css">
+          <p><b>Bookmark Title Generator Demo</b></p>
+          <p>Generate Bookmarks Titles from 5 random Wikipedia pages</p>
+          <div class="button-row">
+            <button id="generate-button">Generate</button>
+            <button id="clear-button" class="secondary">Clear</button>
+          </div>
+          <div id="output"></div>
+      </div>`;
     this.shadowRoot!.querySelector("#generate-button")!.addEventListener("click", () => {
       this.generateBookmarkTitles();
     });
@@ -54,20 +46,35 @@ export default class BookmarkTitleGeneratorDemo extends HTMLElement {
     if (!this.session) return;
     setTimeout(async () => {
       for (let i = 0; i < 5; i++) {
+        // get the page summary
         const url = 'https://en.wikipedia.org/wiki/Special:Random/Wikipedia';
-        const summary = await this.summarizeUrl(url)
-        const bookmarkTitle = await this.session?.prompt(summary);
-        const bookmarkTitleParagraph = document.createElement("p");
-        const bookmarkTitleParagraphBold = document.createElement("b");
-        bookmarkTitleParagraphBold.textContent = bookmarkTitle;
+        const pageSummary = await this.summarizeUrl(url)
+
+        // get bookmark title and create container for it
+        const bookmarkTitle = await this.session?.prompt(pageSummary);
+        const bookmarkTitleParagraph = document.createElement("p");        
+        bookmarkTitleParagraph.classList.add("bookmark-title");
+        
+        // add favicon to the container
         const favicon = document.createElement("img");
         favicon.src = faviconUrl(url);
+        favicon.classList.add("favicon");
         bookmarkTitleParagraph.appendChild(favicon);
-        bookmarkTitleParagraph.appendChild(bookmarkTitleParagraphBold);
-        this.shadowRoot!.querySelector("#output")!.appendChild(bookmarkTitleParagraph );
+
+        // add bookmark title to the container
+        const bookmarkTitleSpan = document.createElement("span");
+        bookmarkTitleSpan.textContent = bookmarkTitle;
+        bookmarkTitleParagraph.appendChild(bookmarkTitleSpan);
+
+        // add the container to the output div
+        const outputDiv = this.shadowRoot!.querySelector("#output")!;
+        outputDiv.appendChild(bookmarkTitleParagraph );
+
+        // add the page summary to the output div
         const summaryParagraph = document.createElement("p");
-        summaryParagraph.textContent = summary;
-        this.shadowRoot!.querySelector("#output")!.appendChild(summaryParagraph);
+        summaryParagraph.classList.add("bookmark-summary");
+        summaryParagraph.textContent = pageSummary;
+        outputDiv.appendChild(summaryParagraph);
       }
     }, 1000);
   }

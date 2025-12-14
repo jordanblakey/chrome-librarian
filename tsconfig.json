@@ -10,7 +10,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "sourceMap": true,
-    "types": ["chrome", "node"],
+    "types": ["chrome", "node", "navigation-api-types"],
     "rootDir": "src",
     "outDir": "dist",
     "tsBuildInfoFile": "/tmp/.tsbuildinfo"

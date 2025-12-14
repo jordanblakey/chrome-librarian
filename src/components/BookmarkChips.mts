@@ -1,6 +1,6 @@
 import { faviconUrl } from "../utils/common.mjs";
 
-export default class BookmarkChips extends HTMLDivElement {
+export default class BookmarkChips extends HTMLElement {
   searchInput: HTMLInputElement;
   constructor() {
     super();
@@ -10,9 +10,10 @@ export default class BookmarkChips extends HTMLDivElement {
       if (this.searchInput.value === "") await this.handleNullQuery();
       this.searchBookmarkChips(this.searchInput.value)
     });
-    this.searchInput.addEventListener('focus', async () => {
-      if (this.searchInput.value === "") await this.handleNullQuery();
-    });
+  }
+
+  connectedCallback() {
+    this.handleNullQuery();
   }
 
   async handleNullQuery() {
@@ -68,4 +69,4 @@ export default class BookmarkChips extends HTMLDivElement {
   }
 }
 
-customElements.define("bookmark-chips", BookmarkChips, { extends: "div" });
+customElements.define("bookmark-chips", BookmarkChips);

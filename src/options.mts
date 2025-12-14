@@ -42,16 +42,18 @@ async function optionsMain() {
   
   // Demos container
   const demosContainer = document.createElement("div");
+  demosContainer.id = "demos-container";
   demosContainer.innerHTML = `<h2>Experimental Demos</h2><p>These components demonstrate raw LLM capabilities.</p>`;
   const lmDemo = new LanguageModelDemo();
   const titleDemo = new BookmarkTitleGeneratorDemo();
   demosContainer.appendChild(lmDemo);
-  demosContainer.appendChild(document.createElement("hr"));
   demosContainer.appendChild(titleDemo);
 
   // Switch Logic
-  const switchTab = (tabName: 'classifier' | 'snapshots' | 'demos') => {
-    contentArea.innerHTML = '';
+  const switchTab = (tabName: 'classifier' | 'snapshots' | 'demos', updateHistory = true) => {
+    if (!tabName) tabName = 'classifier'; // Default fallback
+
+    contentArea.replaceChildren();
     
     // Reset buttons
     btnClassifier.classList.remove("active");
@@ -71,14 +73,27 @@ async function optionsMain() {
       contentArea.appendChild(demosContainer);
       btnDemos.classList.add("active");
     }
+
+    if (updateHistory) {
+      (window as any).history.pushState(tabName, "", `#${tabName}`);
+    }
+    console.debug("[options] switchTab", tabName);
   };
 
   btnClassifier.addEventListener("click", () => switchTab('classifier'));
   btnSnapshots.addEventListener("click", () => switchTab('snapshots'));
   btnDemos.addEventListener("click", () => switchTab('demos'));
+  
+  (window as any).addEventListener("popstate", (event: PopStateEvent) => {
+    switchTab(event.state as 'classifier' | 'snapshots' | 'demos', false);
+  });
 
-  // Default Load
-  switchTab('classifier');
+  const initialTab = window.location.hash.slice(1) as 'classifier' | 'snapshots' | 'demos';
+  if (initialTab) {
+      switchTab(initialTab, false);
+  } else {
+      switchTab('classifier', true);
+  }
 }
 
 typeof window !== "undefined" && optionsMain();

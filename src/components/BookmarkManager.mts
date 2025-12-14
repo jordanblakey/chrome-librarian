@@ -1,4 +1,4 @@
-import ExportBookmarksButton from "./BookmarkExporter.mjs";
+import { exportBookmarks } from "../utils/exportBookmarks.mjs";
 import { storageOnChanged, toast } from "../utils/common.mjs";
 
 export default class BookmarkManager extends HTMLElement {
@@ -9,81 +9,29 @@ export default class BookmarkManager extends HTMLElement {
 
   async connectedCallback() {
     this.shadowRoot!.innerHTML = `
-<div class="bookmark-manager">
-    <style>
-        .bookmark-manager {
-          background-color: #fff;
-          padding: 15px;
-          border-radius: 8px;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        h2 { margin-top: 0; color: #333; }
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
-        }
-        button {
-            padding: 8px 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        button:hover { background-color: #0056b3; }
-        button.secondary { background-color: #6c757d; }
-        button.secondary:hover { background-color: #545b62; }
-        button.danger { background-color: #dc3545; }
-        button.danger:hover { background-color: #c82333; }
-        
-        #snapshots-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .snapshot-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border: 1px solid #eee;
-            margin-bottom: 8px;
-            border-radius: 4px;
-            background: #f9f9f9;
-        }
-        .snapshot-info {
-            display: flex;
-            flex-direction: column;
-        }
-        .snapshot-date { font-weight: bold; color: #333; }
-        .snapshot-meta { font-size: 0.85em; color: #666; }
-        .snapshot-actions { display: flex; gap: 8px; }
-    </style>
-    
-    <h2>Step 0: Snapshots & Backups</h2>
-    <p>Save the current state of your bookmarks before organizing. Restore explicitly creates a *new* folder.</p>
-    
-    <div class="controls" id="button-bar">
-      <button id="create-snapshot">📸 Create Snapshot</button>
-      <button id="clear-snapshots" class="secondary">Clear All</button>
-    </div>
-    
-    <ul id="snapshots-list">
-        <!-- Snapshots will appear here -->
-    </ul>
-</div>
+      <div class="bookmark-manager">
+          <link rel="stylesheet" href="../../assets/css/components.css">
+          
+          <h2>Step 0: Snapshots & Backups</h2>
+          <p>Save the current state of your bookmarks before organizing. Restore explicitly creates a *new* folder.</p>
+          
+          <div class="controls" id="button-bar">
+            <button id="create-snapshot">📸 Create Snapshot</button>
+            <button id="clear-snapshots" class="secondary">Clear All</button>
+            <button id="export-bookmarks" class="secondary">Export Bookmarks</button>
+          </div>
+          
+          <ul id="snapshots-list">
+              <!-- Snapshots will appear here -->
+          </ul>
+      </div>
     `;
     chrome.storage.onChanged.addListener(storageOnChanged);
     this.listSnapshots();
     
     this.shadowRoot!.querySelector("#create-snapshot")!.addEventListener("click", this.createBookmarkSnapshot.bind(this));
     this.shadowRoot!.querySelector("#clear-snapshots")!.addEventListener("click", this.clearSnapshots.bind(this));
-    
-    // Prepend exporter button (assuming it fits well)
-    this.shadowRoot!.querySelector("#button-bar")!.appendChild(new ExportBookmarksButton());
+    this.shadowRoot!.querySelector("#export-bookmarks")!.addEventListener("click", exportBookmarks);
   }
 
   disconnectedCallback() {

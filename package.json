@@ -16,6 +16,7 @@
     "adm-zip": "^0.5.16",
     "chokidar": "^5.0.0",
     "happy-dom": "^20.0.11",
+    "navigation-api-types": "^0.6.1",
     "ora": "^9.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
