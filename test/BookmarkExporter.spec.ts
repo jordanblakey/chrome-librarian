@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import BookmarkExporter from '../src/components/BookmarkExporter.mjs';
+import { recursiveBuild } from '../src/utils/exportBookmarks.mjs';
 
 // Mock dependencies
 vi.mock('../src/utils/common.mjs', () => ({
@@ -8,12 +8,8 @@ vi.mock('../src/utils/common.mjs', () => ({
 }));
 
 // Mock Chrome API
-// We rely on the global chrome mock from test/setup.ts but override getTree for specific tests
 const mockGetTree = vi.fn();
-// We need to update the global mock's getTree to use our local mock for these tests, or spy on it.
-// Since setup.ts uses vi.fn(), we can just redirect it or re-assign.
 chrome.bookmarks.getTree = mockGetTree;
-
 
 // Helper to normalize HTML for comparison
 function normalizeHtml(html: string) {
@@ -23,10 +19,6 @@ function normalizeHtml(html: string) {
 describe('BookmarkExporter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Define custom element if not defined (though JSDOM might handle it)
-    if (!customElements.get('bookmark-exporter')) {
-        customElements.define('bookmark-exporter', BookmarkExporter);
-    }
   });
 
   it('preserves duplicate folders correctly', async () => {
@@ -63,13 +55,8 @@ describe('BookmarkExporter', () => {
 
     mockGetTree.mockResolvedValue(mockTree);
 
-    const exporter = new BookmarkExporter();
-    // We access the internal method or use the public flow
-    // recursiveBuild is what we want to test specifically, but it takes nodes.
-    // Let's call createExportHTML which calls recursiveBuild with tree[0].children
-    
-    // We can access recursiveBuild directly if we cast or ignore TS
-    const html = await exporter.recursiveBuild(mockTree[0].children as any);
+    // Call recursiveBuild directly
+    const html = await recursiveBuild(mockTree[0].children as any);
     
     // Check structure
     const normalized = normalizeHtml(html);

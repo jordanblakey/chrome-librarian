@@ -28,7 +28,7 @@ async function createExportHTML(): Promise<Blob> {
     return new Blob([header, body], { type: 'text/html'})
 }
 
-async function recursiveBuild(nodes: chrome.bookmarks.BookmarkTreeNode[]): Promise<string> {
+export async function recursiveBuild(nodes: chrome.bookmarks.BookmarkTreeNode[]): Promise<string> {
     if (!nodes || nodes.length === 0) return '';
     
     let html = '<DL><p>\n';

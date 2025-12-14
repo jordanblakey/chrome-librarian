@@ -43,6 +43,7 @@ describe("BookmarkChips", () => {
       document.body.appendChild(div);
       chrome.bookmarks.getTree = vi.fn().mockResolvedValue(mockBookmarksResponse);
       const bookmarkChips = new BookmarkChips();
+      document.body.appendChild(bookmarkChips);
       await new Promise(resolve => setTimeout(resolve, 0));
       bookmarkChips.searchInput.focus();
       await new Promise(resolve => setTimeout(resolve, 0));
