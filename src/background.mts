@@ -11,6 +11,17 @@ async function main() {
 }
 
 main();
+ 
+ chrome.runtime.onConnect.addListener((port) => {
+     if (port.name === "keep-alive-options") {
+         console.debug("[background] Options page connected.");
+         port.onDisconnect.addListener(() => {
+             console.debug("[background] Options page disconnected. Resetting badge.");
+             chrome.action.setBadgeText({ text: "" });
+             chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
+         });
+     }
+ });
 
 async function onCommandHandler(command: string) {
   // console.debug("[onCommandHandler] command:", command);

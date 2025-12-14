@@ -1,6 +1,6 @@
 import { CLASSIFY_BOOKMARKS_SYSTEM_PROMPT, GENERATE_CATEGORIES_SYSTEM_PROMPT } from "../data/systemPrompts.mjs";
 import { BOOKMARK_CLASSIFICATION_JSON_SCHEMA, GENERATE_CATEGORIES_JSON_SCHEMA, createClassificationSchema } from "../data/responseConstraintSchemas.mjs";
-import { showBadgeError, showBadgeSuccess, startExtensionSpinner, getWeightedSample as getWeightedBookmarkSample } from "../utils/common.mjs";
+import { showBadgeError, showBadgeSuccess, startExtensionSpinner, resetBadgeToDefault, getWeightedBookmarkSample } from "../utils/common.mjs";
 
 const BATCH_SIZE = 10;
 
@@ -63,7 +63,46 @@ export default class BookmarkClassifier extends HTMLElement {
         try {
             const bookmarkTree = await chrome.bookmarks.getTree();
             const sample = getWeightedBookmarkSample(bookmarkTree, 200);
-            const sampleText = sample.map(n => n.url ? `Bookmark: ${n.title} (${n.url})` : `Folder: ${n.title}`).join('\n');
+            // Dynamic Input Normalization
+            const SYSTEM_HEADROOM_TOKENS = 1000;
+            const MAX_TOKENS = 9216; // Use the actual quota
+            const SAFE_TOKEN_BUDGET = MAX_TOKENS - SYSTEM_HEADROOM_TOKENS; 
+            const EST_CHARS_PER_TOKEN = 3.5; 
+            const TOTAL_CHAR_BUDGET = SAFE_TOKEN_BUDGET * EST_CHARS_PER_TOKEN;
+            
+            // Distribute budget across the sample
+            // We reserve some chars for the label "Bookmark: " (10 chars) + formatting
+            const MIN_CHARS_PER_ITEM = 50; // Don't go below this or it's useless
+            let charsPerItem = Math.floor(TOTAL_CHAR_BUDGET / sample.length);
+            
+            // Ensure reasonable bounds
+            if (charsPerItem < MIN_CHARS_PER_ITEM) {
+                console.warn(`[BookmarkClassifier] Warning: Very strict character budget (${charsPerItem}/item). Prompt might be degraded.`);
+                charsPerItem = MIN_CHARS_PER_ITEM; 
+            }
+            
+            // Allocate 40% to Title, 60% to URL (roughly)
+            // Subtract overhead (~15 chars for "Bookmark: " + parens + newline)
+            const contentChars = Math.max(20, charsPerItem - 15);
+            let titleLimit = Math.floor(contentChars * 0.4);
+            let urlLimit = Math.floor(contentChars * 0.6);
+
+            // Hard caps to prevent wasting tokens on extremely long nonsense
+            titleLimit = Math.min(titleLimit, 100); 
+            urlLimit = Math.min(urlLimit, 150);
+
+            const sampleText = sample.map(n => {
+                let title = n.title.trim();
+                if (title.length > titleLimit) title = title.substring(0, titleLimit - 3) + "...";
+                
+                if (n.url) {
+                    let url = n.url.replace(/^(https?:\/\/)?(www\.)?/, '');
+                    if (url.length > urlLimit) url = url.substring(0, urlLimit - 3) + "...";
+                    return `Bookmark: ${title} (${url})`;
+                } else {
+                    return `Folder: ${title}`;
+                }
+            }).join('\n');
 
             const session = await (window as any).LanguageModel.create({
                 systemPrompt: GENERATE_CATEGORIES_SYSTEM_PROMPT,
@@ -209,7 +248,6 @@ ${chunk.join('\n')}
             showBadgeError();
             return null; 
         } finally {
-            setTimeout(() => { chrome.action.setBadgeText({ text: "" }); }, 10000);
             if (session && typeof session.destroy === 'function') {
                 await session.destroy();
             }

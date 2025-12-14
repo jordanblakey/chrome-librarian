@@ -92,7 +92,7 @@ export function getRandomSample(nodes: chrome.bookmarks.BookmarkTreeNode[], n: n
  * Returns a weighted random sample of `n` nodes from the tree.
  * Folders (nodes without URL) are given 2x weight compared to Bookmarks.
  */
-export function getWeightedSample(nodes: chrome.bookmarks.BookmarkTreeNode[], n: number): chrome.bookmarks.BookmarkTreeNode[] {
+export function getWeightedBookmarkSample(nodes: chrome.bookmarks.BookmarkTreeNode[], n: number): chrome.bookmarks.BookmarkTreeNode[] {
     const folders = getNodes(nodes, "folder");
     const bookmarks = getNodes(nodes, "bookmark");
     
@@ -152,4 +152,8 @@ export function showBadgeError() {
     chrome.action.setBadgeBackgroundColor({ color: "#F44336" });
     chrome.action.setBadgeTextColor({ color: "#FFFFFF" });
 }
-    
+
+export function resetBadgeToDefault() {
+  chrome.action.setBadgeText({ text: '' });
+  chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
+}

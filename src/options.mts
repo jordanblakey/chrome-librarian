@@ -2,10 +2,13 @@ import BookmarkManager from "./components/BookmarkManager.mjs";
 import BookmarkClassifier from "./components/BookmarkClassifier.mjs";
 import LanguageModelDemo from "./components/LanguageModelDemo.mjs";
 import BookmarkTitleGeneratorDemo from "./components/BookmarkTitleGeneratorDemo.mjs";
+import { resetBadgeToDefault } from "./utils/common.mjs";
 
 console.debug("[options] script loaded...");
 
 async function optionsMain() {
+  resetBadgeToDefault();
+
   const container = document.body;
 
   // Tab Header
@@ -99,4 +102,7 @@ async function optionsMain() {
   }
 }
 
-typeof window !== "undefined" && optionsMain();
+// Keep-alive connection to reset badge if tab closes
+ chrome.runtime.connect({ name: "keep-alive-options" });
+ 
+ typeof window !== "undefined" && optionsMain();
