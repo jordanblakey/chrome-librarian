@@ -10,13 +10,14 @@ export default class BookmarkManager extends HTMLElement {
   async connectedCallback() {
     this.shadowRoot!.innerHTML = `
       <div class="bookmark-manager">
+          <link rel="stylesheet" href="../../assets/css/base.css">
           <link rel="stylesheet" href="../../assets/css/components.css">
           
           <h2>Step 0: Snapshots & Backups</h2>
           <p>Save the current state of your bookmarks before organizing. Restore explicitly creates a *new* folder.</p>
           
-          <div class="controls" id="button-bar">
-            <button id="create-snapshot">📸 Create Snapshot</button>
+          <div class="button-row" id="button-bar">
+            <button id="create-snapshot">Create Snapshot</button>
             <button id="clear-snapshots" class="secondary">Clear All</button>
             <button id="export-bookmarks" class="secondary">Export Bookmarks</button>
           </div>
@@ -82,7 +83,7 @@ export default class BookmarkManager extends HTMLElement {
                    Avg Depth: ${stats.avgDepth.toFixed(1)} | Max Depth: ${stats.maxDepth} | Size: ${(JSON.stringify(tree).length / 1024).toFixed(1)} KB
                 </span>
             </div>
-            <div class="snapshot-actions">
+            <div class="button-row">
                 <button class="restore-btn">Restore</button>
                 <button class="danger delete-btn">Delete</button>
             </div>

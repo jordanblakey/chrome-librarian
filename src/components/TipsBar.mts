@@ -1,7 +1,10 @@
-export default class TipsBar extends HTMLParagraphElement {
+export default class TipsBar extends HTMLElement {
   constructor() {
     super();
-    this.innerHTML = this.getRandomTip();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `<p>${this.getRandomTip()}</p>`;
     this.initLink();
   }
 
@@ -12,8 +15,6 @@ export default class TipsBar extends HTMLParagraphElement {
     "Restore your bookmarks from a point in time using <b>Snapshots</b>.",
     "Use the AI Classifier to <b>automatically categorize your bookmarks</b>."
   ]
-  // ux: popup - add popup tips concerning classifier and snapshots
-
 
   getRandomTip() {
     return `Tip: ${this.tips[Math.floor(Math.random() * this.tips.length)]}`;
@@ -30,4 +31,4 @@ export default class TipsBar extends HTMLParagraphElement {
 
 }
 
-customElements.define("options-page-link", TipsBar, { extends: "p" });
+customElements.define("tips-bar", TipsBar);

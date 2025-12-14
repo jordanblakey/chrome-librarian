@@ -27,13 +27,18 @@ export async function imgUrlToDataUrl(url: string): Promise<string> {
   });
 }
 
+import { ToastMessage } from "../components/ToastMessage.mjs";
+
 export function toast(message: string, type: "success" | "error" | "warning" | "info") {
-    const toast = document.createElement("div");
-    toast.classList.add("toast");
-    toast.classList.add(type);
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 1000);
+    // Ensure the custom element is defined (if not already imported elsewhere)
+    if (!customElements.get("toast-message")) {
+        customElements.define("toast-message", ToastMessage);
+    }
+
+    const toastElement = document.createElement("toast-message");
+    toastElement.setAttribute("message", message);
+    toastElement.setAttribute("type", type);
+    document.body.appendChild(toastElement);
 }
 
 export function storageOnChanged(changes: { [key: string]: chrome.storage.StorageChange; }, namespace: string) {

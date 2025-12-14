@@ -19,6 +19,10 @@ export async function createLanguageModelSession(
 
   console.debug("[createLanguageModelSession] availability:", availability);
 
+  if (availability === "no") {
+    throw new Error("The device is unable to create a session to run the model. Please check the result of availability() first.");
+  }
+
   const params = await (globalThis as any).LanguageModel.params();
   const controller = new AbortController();
   const session: LanguageModel = await (globalThis as any).LanguageModel.create(

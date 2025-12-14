@@ -1,27 +1,172 @@
+@import "./variables.css";
+
+/* ------------------------------------------------------------------------- */
+/* ELEMENT SELECTORS                                                         */
+/* ------------------------------------------------------------------------- */
+
+body {
+  font-size: 13px;
+  font-family: var(--font-family-base);
+
+  h1 {
+    background: var(--color-primary);
+    color: var(--color-text-light);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  &.options-page h1 {
+    padding: var(--spacing-md);
+    margin: 0;
+  }
+
+  &.popup-page h1 {
+    padding: var(--spacing-sm);
+    margin: 0;
+  }
+}
+
+h2 {
+  margin-top: 0;
+  color: var(--color-text-main);
+}
+
+button {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  cursor: pointer;
+  background-color: var(--color-primary);
+  color: var(--color-text-light);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  line-height: 1.5;
+
+  &:hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  &.secondary {
+    background-color: var(--color-secondary);
+
+    &:hover {
+      background-color: var(--color-secondary-hover);
+    }
+  }
+
+  &.danger {
+    background-color: var(--color-danger);
+
+    &:hover {
+      background-color: var(--color-danger-hover);
+    }
+  }
+}
+
+input,
+textarea,
+select,
+option,
+button,
+a {
+  &:focus {
+    border-radius: 0;
+    outline-width: 2px;
+    outline-offset: -1px;
+    outline-style: solid;
+  }
+}
+
+input[type="text"],
+textarea,
+select {
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background-main);
+  border-radius: var(--border-radius-sm);
+  min-width: var(--input-min-width);
+  cursor: pointer;
+}
+
+textarea.auto-resize {
+  field-sizing: content;
+  display: block;
+  max-width: 100%;
+  min-width: 100%;
+}
+
+select {
+  appearance: base-select;
+  min-width: var(--input-min-width);
+  display: inline-flex;
+  align-items: center;
+
+  &::picker(select) {
+    appearance: base-select;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+  }
+
+  option:hover,
+  option:checked {
+    background-color: var(--color-primary);
+    color: var(--color-text-light);
+  }
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+  transform: scale(1.5);
+  margin: var(--spacing-xs);
+  filter: hue-rotate(21deg) contrast(3) saturate(0.9);
+}
+
+/* ------------------------------------------------------------------------- */
+/* CLASS AND ID SELECTORS                                                    */
+/* ------------------------------------------------------------------------- */
+
 .hidden {
   display: none;
 }
 
-body.options-page {
-  h1 {
-    background: blue;
-    color: white;
-  }
+.tab-container {
+  display: flex;
+  margin-bottom: var(--spacing-xl);
+  border-bottom: 2px solid var(--color-border);
 }
 
-.toast {
-    position: absolute;
-    top: 0;
-    border: 1px solid black;
-    margin-top: 10px;
-    padding: 5px 20px;
-    text-align: center;
-    left: 50%;
-    transform: translateX(-50%);
-    &.success {
-      background-color: rgb(217, 255, 217);
-    }
-    &.error {
-      background-color: rgb(255, 222, 222);
-    }
+.tab-button {
+  padding: var(--spacing-md) var(--spacing-xl);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: var(--color-text-main);
+  border-radius: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tab-button::after {
+  content: attr(data-title);
+  height: 0;
+  visibility: hidden;
+  overflow: hidden;
+  user-select: none;
+  pointer-events: none;
+  font-weight: bold;
+}
+
+.tab-button:hover {
+  background-color: var(--color-border);
+}
+
+.tab-button.active {
+  border-bottom: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+#content-area {
+  padding: 0 var(--spacing-md);
 }

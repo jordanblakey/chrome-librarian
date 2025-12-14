@@ -1,0 +1,47 @@
+:host,
+:root {
+    /* Colors */
+    --color-primary: rgb(0, 0, 238);
+    --color-primary-hover: rgb(49, 49, 255);
+    --color-secondary: slategray;
+    --color-secondary-hover: dimgray;
+    --color-danger: rgb(255, 0, 0);
+    --color-danger-hover: rgb(255, 10, 10);
+    --color-success: green;
+
+    --color-background-main: white;
+    --color-background-offset: ghostwhite;
+    --color-background-active: whitesmoke;
+    --color-background-highlight: aquamarine;
+    --color-background-visited: rgb(128, 0, 128);
+    /* for links/chips */
+    --color-background-success: rgb(217, 255, 217);
+    --color-background-error: rgb(255, 222, 222);
+
+    --color-text-main: #333;
+    --color-text-light: white;
+    --color-text-secondary: dimgray;
+    --color-text-link: blue;
+    --color-text-link-active: red;
+
+    --color-border: lightgray;
+    --color-border-focus: dodgerblue;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 10px;
+    --spacing-lg: 16px;
+    --spacing-xl: 20px;
+
+    /* Borders & Styles */
+    --border-radius-sm: 0;
+    --border-radius-md: 0;
+    --box-shadow-card: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+    /* Fonts */
+    --font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    /* Dimensions */
+    --input-min-width: 200px;
+}

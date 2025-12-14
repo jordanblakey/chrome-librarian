@@ -15,14 +15,17 @@ async function optionsMain() {
   const btnClassifier = document.createElement("button");
   btnClassifier.className = "tab-button active";
   btnClassifier.textContent = "AI Classifier";
+  btnClassifier.dataset.title = "AI Classifier";
   
   const btnSnapshots = document.createElement("button");
   btnSnapshots.className = "tab-button";
   btnSnapshots.textContent = "Snapshots & Backups";
+  btnSnapshots.dataset.title = "Snapshots & Backups";
 
   const btnDemos = document.createElement("button");
   btnDemos.className = "tab-button";
   btnDemos.textContent = "Demos";
+  btnDemos.dataset.title = "Demos";
 
   tabContainer.appendChild(btnClassifier);
   tabContainer.appendChild(btnSnapshots);

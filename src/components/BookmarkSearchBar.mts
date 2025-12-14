@@ -7,7 +7,10 @@ export default class BookmarkSearchBar extends HTMLInputElement {
   }
 
   connectedCallback() {
-    this.innerHTML = `<link rel="stylesheet" href="../../assets/css/components.css">`;
+    this.innerHTML = `
+      <link rel="stylesheet" href="../../assets/css/base.css">
+      <link rel="stylesheet" href="../../assets/css/components.css">
+    `;
 
     window.addEventListener('focus', () => this.focus());
     chrome.commands.onCommand.addListener(command => {

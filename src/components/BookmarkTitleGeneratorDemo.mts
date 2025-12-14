@@ -12,8 +12,10 @@ export default class BookmarkTitleGeneratorDemo extends HTMLElement {
   async connectedCallback() {
     this.shadowRoot!.innerHTML = `
       <div class="bookmark-title-generator-demo card">
+          <link rel="stylesheet" href="../../assets/css/base.css">
           <link rel="stylesheet" href="../../assets/css/components.css">
-          <p><b>Bookmark Title Generator Demo</b></p>
+
+          <h3>Bookmark Title Generator Demo</h3>
           <p>Generate Bookmarks Titles from 5 random Wikipedia pages</p>
           <div class="button-row">
             <button id="generate-button">Generate</button>
@@ -28,14 +30,24 @@ export default class BookmarkTitleGeneratorDemo extends HTMLElement {
       this.clear();
     });
 
-    const { session, controller } = await createLanguageModelSession(
-      1, 1, ["en"], "text", "text", 
-      [{ 
-        role: "system", 
-        content: "You are a bookmark title generator. Given the text of a webpage, say what it is in 5 words or less. Do not add punctuation or Markdown formatting." 
-      }]);
-    this.session = session;
-    this.controller = controller;
+    try {
+      const { session, controller } = await createLanguageModelSession(
+        1, 1, ["en"], "text", "text", 
+        [{ 
+          role: "system", 
+          content: "You are a bookmark title generator. Given the text of a webpage, say what it is in 5 words or less. Do not add punctuation or Markdown formatting." 
+        }]);
+      this.session = session;
+      this.controller = controller;
+    } catch (e) {
+       console.error(e);
+       this.shadowRoot!.querySelector("#output")!.innerHTML = `
+          <div class="card" style="background:var(--color-background-error); color:var(--color-danger);">
+            <b>Error:</b> Unable to create language model session.<br>
+            ${e}
+          </div>
+       `;
+    }
   }
 
   clear() {

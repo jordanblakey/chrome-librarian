@@ -1,0 +1,264 @@
+@import "./variables.css";
+
+:host {
+    .card {
+        background-color: var(--color-background-main);
+        border: 1px solid var(--color-border);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-sm);
+        border-radius: var(--border-radius-md);
+
+        h3 {
+            margin-top: 0;
+        }
+    }
+
+    .button-row {
+        display: flex;
+        align-items: stretch;
+        gap: var(--spacing-xs);
+        flex-wrap: wrap;
+
+        select {
+            margin: 0;
+        }
+
+        span,
+        label {
+            display: inline-flex;
+            align-items: center;
+            margin: 0 var(--spacing-xs);
+            line-height: 1.5;
+
+            &:has(input[type="radio"]),
+            &:has(input[type="checkbox"]) {
+                align-items: stretch;
+
+                input[type="radio"],
+                input[type="checkbox"] {
+                    align-self: center;
+                }
+            }
+        }
+    }
+
+    .language-model-demo {
+        gap: 1rem;
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+
+
+        .output-group {
+            pre {
+                margin: 0;
+                text-wrap: wrap;
+            }
+        }
+
+        .transcript-message {
+            margin: 1px;
+            padding: 5px;
+            display: inline-block;
+
+            &.human-user {
+                background-color: var(--color-background-active);
+            }
+
+            &.assistant {
+                background-color: var(--color-background-highlight);
+            }
+
+            &.error {
+                background-color: var(--color-background-error);
+                color: var(--color-danger);
+                border: 1px solid var(--color-danger);
+            }
+        }
+    }
+
+    .bookmark-manager {
+        >.button-row {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        #snapshots-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .snapshot-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            margin-bottom: var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            background: var(--color-background-offset);
+        }
+
+        .snapshot-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .snapshot-date {
+            font-weight: bold;
+            color: var(--color-text-main);
+        }
+
+        .snapshot-meta {
+            font-size: 0.85em;
+            color: var(--color-text-secondary);
+        }
+
+    }
+
+    .bookmark-classifier {
+        #results {
+            margin-top: var(--spacing-md);
+            white-space: pre-wrap;
+            /* Preserve whitespace for JSON display */
+            font-size: 0.9em;
+            background: var(--color-background-main);
+            padding: var(--spacing-md);
+            border: 1px solid #cccccc;
+        }
+    }
+
+    .bookmark-title-generator-demo {
+        #output {
+            > :first-child {
+                margin-top: var(--spacing-lg);
+            }
+        }
+
+        .bookmark-title {
+            font-weight: bold;
+            line-height: 100%;
+            display: flex;
+            align-items: center;
+            margin: var(--spacing-xs) 0;
+
+            .favicon {
+                width: 16px;
+                height: 16px;
+                margin-right: var(--spacing-xs);
+            }
+
+            span {
+                line-height: 100%;
+            }
+        }
+
+        .bookmark-summary {
+            margin-top: var(--spacing-xs);
+        }
+    }
+
+    .toast {
+        position: fixed;
+        /* Fixed to stay relative to viewport inside shadow DOM if needed, or absolute */
+        top: 0;
+        border: 1px solid var(--color-text-main);
+        margin-top: var(--spacing-md);
+        padding: var(--spacing-xs) var(--spacing-xl);
+        text-align: center;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        min-width: 200px;
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--box-shadow-card);
+        background-color: var(--color-background-main);
+
+        &.success {
+            background-color: var(--color-background-success);
+            border-color: var(--color-success);
+        }
+
+        &.error {
+            background-color: var(--color-background-error);
+            border-color: var(--color-danger);
+        }
+    }
+
+
+}
+
+a#tip-link {
+    color: var(--color-text-link);
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:active {
+        color: var(--color-text-link-active);
+    }
+}
+
+#bookmark-search-bar {
+    width: 100%;
+}
+
+#bookmark-chips {
+    &.hidden {
+        display: none;
+    }
+
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: var(--spacing-sm);
+
+    .bookmark-chip {
+        display: flex;
+        max-width: calc(50% - 12px);
+
+        .chip-title {
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        align-items: center;
+        gap: var(--spacing-xs);
+        border-radius: var(--border-radius-sm);
+        background-color: var(--color-background-offset);
+        border: 1px solid var(--color-background-offset);
+        flex-grow: 1;
+        flex-shrink: 1;
+        margin:1px;
+        padding: var(--spacing-xs);
+        text-decoration: none;
+        white-space: nowrap;
+
+        &:hover {
+            &:visited {
+                background: var(--color-background-visited);
+                color: var(--color-text-light);
+            }
+
+            &:active {
+                background: var(--color-danger);
+                color: var(--color-text-light);
+            }
+
+            background: var(--color-primary);
+            color: var(--color-text-light);
+        }
+
+        &:visited {
+            color: var(--color-background-visited);
+        }
+
+        img {
+            width: 16px;
+            height: 16px;
+        }
+    }
+}

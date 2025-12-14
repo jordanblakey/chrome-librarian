@@ -25,8 +25,10 @@ export default class BookmarkClassifier extends HTMLElement {
     private render() {
         this.shadowRoot!.innerHTML = `
             <div class="bookmark-classifier">
+                <link rel="stylesheet" href="../../assets/css/base.css">
                 <link rel="stylesheet" href="../../assets/css/components.css">
-                <p><b>Bookmark Classifier</b></p>
+                
+                <h2>Bookmark Classifier</h2>
                 <p>Create a folder hierarchy based on the metadata of all bookmarks.</p>
                 <div id="button-bar">
                 <button id="generate-novel-schema">0. Generate Categories</button>

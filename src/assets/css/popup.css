@@ -1,80 +1,14 @@
+@import "./variables.css";
+
 html {
   width: 785px;
   margin: 0;
-  box-sizing:border-box;
-  scrollbar-gutter: stable; 
+  box-sizing: border-box;
+  scrollbar-gutter: stable;
 }
 
-html, body {
-    height: fit-content;
-    box-sizing:border-box;
-}
-
-body.popup-page {
-  margin: 8px;
-  box-sizing:border-box;
-
-  h1 {
-    background: green;
-    color: white;
-  }
-
-  a#tip-link {
-    color: blue;
-    text-decoration: underline;
-    cursor: pointer;
-    &:active {
-      color: red;
-    }
-  }
-
-  #bookmark-chips {
-    &.hidden {
-      display: none;
-    }
-    display: flex;
-    flex-wrap: wrap;
-    .bookmark-chip {
-      display: flex;
-      max-width: calc(50% - 12px);
-      .chip-title {
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-      align-items: center;
-      gap: 3px;
-      border-radius: 5px;
-      border: 1px solid blue;
-      flex-grow: 1;
-      flex-shrink: 1;
-      margin:1px;
-      padding: 2px  5px 2px 3px;
-      text-align: center;
-      text-decoration: none;
-      white-space: nowrap;
-      &:hover {
-        &:visited {
-          background: purple;
-          color: white;
-        }
-        &:active {
-          background: red;
-          color: white;
-          border-color: red;
-        }
-        background: blue;
-        color: white;
-      }
-      &:visited {
-        color: purple;
-        border-color: purple;
-      }
-
-      img {
-        width: 16px;
-        height: 16px;
-      } 
-    }
-  }
+html,
+body {
+  height: fit-content;
+  box-sizing: border-box;
 }
