@@ -11,5 +11,10 @@ vi.stubGlobal("chrome", {
   },
   downloads: {
     download: vi.fn()
+  },
+  commands: {
+    onCommand: {
+      addListener: vi.fn()
+    }
   }
 });

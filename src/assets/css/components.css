@@ -202,10 +202,6 @@ a#tip-link {
     }
 }
 
-#bookmark-search-bar {
-    width: 100%;
-}
-
 #bookmark-chips {
     &.hidden {
         display: none;
@@ -261,4 +257,29 @@ a#tip-link {
             height: 16px;
         }
     }
+}
+
+#bookmark-search-bar {
+  display: block;
+  width: 100%;
+}
+
+.search-container {
+  position: relative;
+  width: 100%;
+}
+
+#bookmark-search-input {
+  width: 100%;
+  padding-right: 150px; /* Space for the count */
+}
+
+#search-count {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  /* font-size: 0.9em; */
 }

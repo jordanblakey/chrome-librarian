@@ -1,18 +1,30 @@
 import { faviconUrl } from "../utils/common.mjs";
+import BookmarkSearchBar from "./BookmarkSearchBar.mjs";
 
 export default class BookmarkChips extends HTMLElement {
-  searchInput: HTMLInputElement;
+  searchInput: BookmarkSearchBar | null = null;
+  
   constructor() {
     super();
     this.id = "bookmark-chips";
-    this.searchInput = document.getElementById("bookmark-search-bar") as HTMLInputElement;
-    this.searchInput.addEventListener('input', async() => {
-      if (this.searchInput.value === "") await this.handleNullQuery();
-      this.searchBookmarkChips(this.searchInput.value)
-    });
   }
 
   connectedCallback() {
+    this.searchInput = document.getElementById("bookmark-search-bar") as BookmarkSearchBar;
+    
+    if (this.searchInput && this.searchInput.inputElement) {
+        this.searchInput.inputElement.addEventListener('input', async() => {
+            if (this.searchInput && this.searchInput.value === "") { 
+                await this.handleNullQuery();
+                this.searchInput.setCount(0);
+            } else if (this.searchInput) {
+                this.searchBookmarkChips(this.searchInput.value)
+            }
+        });
+    } else {
+        console.error("BookmarkSearchBar not found or not ready");
+    }
+
     this.handleNullQuery();
   }
 
@@ -23,10 +35,14 @@ export default class BookmarkChips extends HTMLElement {
       .filter(node => node[0].url)
       .map(node => this.bookmarkTreeNodeToChip(node[0]));
     this.replaceChildren(...chips);
+    this.searchInput?.setCount(0); // Ensure count is hidden or reset
+    if (this.searchInput && this.searchInput.inputElement) {
+      this.searchInput.inputElement.placeholder = `Search ${chips.length} bookmarks...`;
+    }
   }
 
   async searchBookmarkChips(query: string) {
-    if (this.searchInput.value === "") {
+    if (this.searchInput?.value === "") {
       await this.handleNullQuery();
       return;
     }
@@ -35,6 +51,7 @@ export default class BookmarkChips extends HTMLElement {
       .filter(result => result.url)
       .map(result => this.bookmarkTreeNodeToChip(result));
     this.replaceChildren(...chips);
+    this.searchInput?.setCount(chips.length);
   }
 
   bookmarkTreeNodeToChip(node: chrome.bookmarks.BookmarkTreeNode) {
