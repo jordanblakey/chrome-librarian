@@ -1,34 +1,38 @@
-# complex tasks
-feature: create new bookmarks from query (pick from top 3 search results) "search - 'create: reddit'" - see: https://developer.chrome.com/docs/extensions/reference/api/search
-feature: 2 stage process: 1. iteratively create tree from chunks of data, then 2. assign links to the tree. This can address Gemini Nano token limitations.
-feature: semantic bookmark search
+# RECOMMENDATIONS
+feature: on startup, generate 3 novel bookmark recommendations based on your most recently used bookmarks.
 feature: bookmark name recommender. creates an index of how descriptive each bookmark name is
   if it's bad, recommend name updates using the bookmark title generator (fetch html and summarize). The user can review these and choose to apply them.
-feature: given the list of classifications, create a folder hierarchy using LLM, max depth 2
-feature: given the folder hierarchy, assign bookmarks to the appropriate folders
-feature: within each folder, sort bookmarks by date added by default
-feature: allow sorting by other criteria, e.g. alphabetically
-feature: given a new bookmark, check if there is an appropriate classification, and if so, assign it to the appropriate folder
-feature: given a new bookmark, if there is no appropriate classification, rebuild the folder hierarchy and reassign bookmarks
-feature: concept of "recommendations": e.g. 
-  "your new bookmark should go here", 
+feature: concept of "recommendations": e.g.
+  "your new bookmark should go here",
   "this old bookmark should be renamed",
   "your old bookmark is miscategorized, it should go here"
-# simple tasks
-feature: options
-  sliding window of daily snapshots (e.g. 7 days). 
-  possibly 2 columns, or tabs for auto and manual snapshots
-feature: options - pinned snapshots (stay at top, can be aliased or tagged)
+
+# SORTING
+feature: group bookmarks into subfolders by domain within category folder - Generate descriptive title for grouped bookmarks
+feature: overflow _more folder for 10+ items in category folder
+feature: within each folder, use history to check each the occurences of each domain, and sort by most used.
+  https://developer.chrome.com/docs/extensions/reference/api/history#method-search
+  If history is not available, fallback to lastUsed
+
+# CLASSIFICATION
+feature: given a new bookmark, check if there is an appropriate classification, and if so, assign it to the appropriate folder
+feature: given a new bookmark, if there is no appropriate classification, rebuild the folder hierarchy and reassign bookmarks
 feature: improve generated classifications by doing this in batches:
   (say 10 batches of 15 so 150 categories generated independently)
   then generate the final 15 classifications based on the most common from the 150
   this can fix the context size limitation for the Prompt
 
+# SNAPSHOTS
+feature: options
+  sliding window of daily snapshots (e.g. 7 days).
+  possibly 2 columns, or tabs for auto and manual snapshots
+
+================================================================================
+
 # simple tasks
+feature: options - pinned snapshots (stay at top, can be aliased or tagged)
 feature: system notification when tasks complete (primarily classifications).
 feature: Arrow navigation for chips
-feature: group search results by domain within category folder
-feature: overflow _more folder for 10+ items in category folder
 
 # very simple tasks
 ux: popup - hovering bookmark chip shows title, full bookmark path, and url on 3 lines

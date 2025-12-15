@@ -47,7 +47,7 @@ export const GENERATE_BOOKMARKS_JSON_SCHEMA = {
 
 // Factory function to create the schema with dynamic categories
 export const createClassificationSchema = (categories: string[]) => {
-    const categoriesString = categories.map((c, i) => `${i+1}. ${c}`).join('\n                ');
+    const categoriesString = categories.map((c) => `- ${c}`).join('\n                ');
     return {
         type: "object",
         description: "A wrapper object containing the list of classified bookmarks.",
@@ -85,29 +85,29 @@ export const GENERATE_CATEGORIES_JSON_SCHEMA = {
 };
 
 export const BOOKMARK_CLASSIFICATION_JSON_SCHEMA = createClassificationSchema([
-    "Development & Tech",
-    "News & Reference",
-    "Entertainment & Media",
-    "Shopping & Lifestyle",
-    "Tools & Utilities",
-    "AI & Machine Learning",
-    "DevOps & Cloud",
-    "Data Science & Analytics",
-    "Hardware & Gadgets",
-    "Design & UX/UI",
-    "Science & Research",
-    "History & Culture",
-    "Finance & Investing",
-    "Education & E-Learning",
-    "Legal & Government",
-    "Health & Fitness",
-    "Travel & Destinations",
-    "Food & Cooking",
-    "Arts & Hobbies",
+    "Development and Tech",
+    "News and Reference",
+    "Entertainment and Media",
+    "Shopping and Lifestyle",
+    "Tools and Utilities",
+    "AI and Machine Learning",
+    "DevOps and Cloud",
+    "Data Science and Analytics",
+    "Hardware and Gadgets",
+    "Design and UX/UI",
+    "Science and Research",
+    "History and Culture",
+    "Finance and Investing",
+    "Education and E-Learning",
+    "Legal and Government",
+    "Health and Fitness",
+    "Travel and Destinations",
+    "Food and Cooking",
+    "Arts and Hobbies",
     "Gaming",
-    "Social Media & Forums",
-    "Real Estate & Home",
+    "Social Media and Forums",
+    "Real Estate and Home",
     "Automotive",
-    "Jobs & Career",
-    "Charity & Non-Profit"
+    "Jobs and Career",
+    "Charity and Non-Profit"
 ]);

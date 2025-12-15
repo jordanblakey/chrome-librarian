@@ -54,7 +54,7 @@ export default class BookmarkClassifier extends HTMLElement {
     // STEP 0: NOVEL CATEGORY GENERATION (Optional)
     // ----------------------------------------------------------------------
 
-    async generateNovelSchema() {
+    async generateNovelSchema(): Promise<void> {
         this.updateStatus("Status: Sampling bookmarks to generate novel categories...");
 
         const stopSpinner = startExtensionSpinner();
@@ -131,7 +131,6 @@ export default class BookmarkClassifier extends HTMLElement {
         } finally {
             stopSpinner();
             showBadgeSuccess();
-            return this.activeSchema;
         }
     }
 
@@ -139,7 +138,7 @@ export default class BookmarkClassifier extends HTMLElement {
     // STEP 1: CLASSIFICATION (Batched for Performance)
     // ----------------------------------------------------------------------
 
-    async createClassifications() {
+    async createClassifications(): Promise<void> {
         this.allClusteredData = []; // Reset old data
         this.updateStatus("Status: Fetching bookmarks and starting batch classification...");
         
@@ -210,7 +209,8 @@ ${chunk.join('\n')}
                         if (parts.length >= 2) {
                             const id = parts[0].trim();
                             // Join rest in case category has colon (unlikely but safe)
-                            const cluster_name = parts.slice(1).join(":").trim();
+                            // Sanitize: Replace "&" with "and" to prevent valid XML/HTML issues in Chrome Menus
+                            const cluster_name = parts.slice(1).join(":").trim().replace(/\s*&\s*/g, " and ");
                             clusteredData.push({ id, cluster_name });
                         }
                     }
@@ -239,14 +239,10 @@ ${chunk.join('\n')}
             this.shadowRoot!.querySelector("#create-hierarchy")!.removeAttribute("disabled");
             stopSpinner();
             showBadgeSuccess();
-
-            return this.allClusteredData;
-
         } catch (error) {
             this.updateStatus(`Fatal Error: ${error}. Check console.`);
             stopSpinner();
             showBadgeError();
-            return null; 
         } finally {
             if (session && typeof session.destroy === 'function') {
                 await session.destroy();
@@ -258,10 +254,10 @@ ${chunk.join('\n')}
     // STEP 2: HIERARCHY GENERATION
     // ----------------------------------------------------------------------
 
-    async createFolderHierarchy() {
+    async createFolderHierarchy(): Promise<void> {
         if (this.allClusteredData.length === 0) {
             this.updateStatus("Error: Run classification (Step 1) first.");
-            return null;
+            return;
         }
         this.updateStatus("Status: Generating folder hierarchy...");
 
@@ -292,8 +288,6 @@ ${chunk.join('\n')}
         this.updateStatus("Hierarchy generated successfully (Direct Mapping).");
         this.displayResults(folderHierarchy, "Final Folder Hierarchy");
         this.shadowRoot!.querySelector("#assign-folders")!.removeAttribute("disabled");
-        
-        return folderHierarchy;
     }
 
     // ----------------------------------------------------------------------
@@ -304,7 +298,7 @@ ${chunk.join('\n')}
     // to include the original BookmarkTreeNode ID, so we can delete the 
     // old link and create a new one inside the new folder.
     
-    async assignBookmarksToFolders() {
+    async assignBookmarksToFolders(): Promise<void> {
     
         if (!this.folderHierarchy || this.allClusteredData.length === 0) {
             this.updateStatus("Error: Missing data. Please run Step 1 and Step 2 first.");
@@ -379,20 +373,20 @@ ${chunk.join('\n')}
     }
 
     // --- HELPER METHODS FOR UI ---
-    clearClassifications() {
+    clearClassifications(): void {
         this.allClusteredData = [];
         this.updateStatus("Data Cleared.");
         this.shadowRoot!.querySelector("#create-hierarchy")!.setAttribute("disabled", "true");
         this.shadowRoot!.querySelector("#assign-folders")!.setAttribute("disabled", "true");
     }
 
-    updateStatus(message: string) {
+    updateStatus(message: string): void {
         const resultsDiv = this.shadowRoot!.querySelector("#results") as HTMLElement;
         const timestamp = new Date().toLocaleTimeString();
         resultsDiv.innerHTML = `<p>[${timestamp}] ${message}</p>`; // Use innerHTML to replace status
     }
 
-    displayResults(data: any, title = "Clustering Results") {
+    displayResults(data: any, title = "Clustering Results"): void {
         const resultsDiv = this.shadowRoot!.querySelector("#results") as HTMLElement;
         const jsonString = JSON.stringify(data, null, 2);
         resultsDiv.innerHTML += `<h3>${title}</h3><pre>${jsonString}</pre>`; 
