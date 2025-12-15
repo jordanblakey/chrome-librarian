@@ -11,6 +11,7 @@ export default class BookmarkClassifier extends HTMLElement {
     private allClusteredData: { id: string, cluster_name: string }[] = [];
     private folderHierarchy: FolderHierarchy | null = null;
     private activeSchema: Record<string, any> = BOOKMARK_CLASSIFICATION_JSON_SCHEMA;
+    private workflowStep: number = 0; // 0=Init, 1=CatsGen, 2=Classified, 3=Hierarchy, 4=Assigned
 
     constructor() {
         super();
@@ -32,14 +33,15 @@ export default class BookmarkClassifier extends HTMLElement {
                 <p>Create a folder hierarchy based on the metadata of all bookmarks.</p>
                 <div id="button-bar">
                 <button id="generate-novel-schema">0. Generate Categories</button>
-                <button id="create-classifications">1. Create Classifications</button>
-                <button id="create-hierarchy" disabled>2. Create Hierarchy</button>
-                <button id="assign-folders" disabled>3. Assign Bookmarks</button>
+                <button id="create-classifications" disabled>1. Categorize Bookmarks</button>
+                <button id="create-hierarchy" disabled>2. Create Folders</button>
+                <button id="assign-folders" disabled>3. Organize Bookmarks</button>
                 <button id="clear-classifications" class="secondary">Clear Data</button>
                 </div>
                 <div id="results"></div>
             </div>
         `;
+        this.updateButtonStates();
     }
 
     private bindEvents() {
@@ -131,6 +133,10 @@ export default class BookmarkClassifier extends HTMLElement {
         } finally {
             stopSpinner();
             showBadgeSuccess();
+            if (this.activeSchema !== BOOKMARK_CLASSIFICATION_JSON_SCHEMA) {
+                this.workflowStep = 1;
+                this.updateButtonStates();
+            }
         }
     }
 
@@ -236,9 +242,10 @@ ${chunk.join('\n')}
             
             this.updateStatus(`Classification complete | Input: ${this.originalBookmarksMap.size} | Organized: ${this.allClusteredData.length} | Total Time: ${(totalTime / 1000).toFixed(2)}s | Avg Batch: ${(avgBatchTime / 1000).toFixed(2)}s`);
             this.displayResults(this.allClusteredData);
-            this.shadowRoot!.querySelector("#create-hierarchy")!.removeAttribute("disabled");
             stopSpinner();
             showBadgeSuccess();
+            this.workflowStep = 2;
+            this.updateButtonStates();
         } catch (error) {
             this.updateStatus(`Fatal Error: ${error}. Check console.`);
             stopSpinner();
@@ -260,6 +267,7 @@ ${chunk.join('\n')}
             return;
         }
         this.updateStatus("Status: Generating folder hierarchy...");
+        const stopSpinner = startExtensionSpinner();
 
         // Since Step 1 is now strictly 5 broad categories, we don't need AI for Step 2.
         // The AI was hallucinating sub-folders that didn't exist in the data.
@@ -287,7 +295,10 @@ ${chunk.join('\n')}
 
         this.updateStatus("Hierarchy generated successfully (Direct Mapping).");
         this.displayResults(folderHierarchy, "Final Folder Hierarchy");
-        this.shadowRoot!.querySelector("#assign-folders")!.removeAttribute("disabled");
+        stopSpinner();
+        showBadgeSuccess();
+        this.workflowStep = 3;
+        this.updateButtonStates();
     }
 
     // ----------------------------------------------------------------------
@@ -304,6 +315,7 @@ ${chunk.join('\n')}
             this.updateStatus("Error: Missing data. Please run Step 1 and Step 2 first.");
             return;
         }
+        const stopSpinner = startExtensionSpinner();
 
         try {
             // 1. Create the new folder structure
@@ -311,6 +323,7 @@ ${chunk.join('\n')}
             // to avoid messing up the user's existing bar too much.
             // Let's create a dedicated root for this session to be safe.
             const timestamp = new Date().toLocaleTimeString().replace(/:/g, "-");
+            
             const sessionRoot = await chrome.bookmarks.create({ 
                 parentId: "1", 
                 title: `AI Organized (${timestamp})` 
@@ -365,19 +378,45 @@ ${chunk.join('\n')}
             }
 
             this.updateStatus(`Success! Copied ${moveCount} bookmarks to "Bookmarks Bar > AI Organized (${timestamp})".`);
-
+            stopSpinner();
+            showBadgeSuccess();
         } catch (error) {
             console.warn(error);
             this.updateStatus(`Error assigning bookmarks: ${error}`);
+            stopSpinner();
+            showBadgeError();
         }
+        // Even if some failed, we mark as done to prevent double click
+        this.workflowStep = 4;
+        this.updateButtonStates();
     }
 
     // --- HELPER METHODS FOR UI ---
     clearClassifications(): void {
         this.allClusteredData = [];
+        this.folderHierarchy = null;
         this.updateStatus("Data Cleared.");
-        this.shadowRoot!.querySelector("#create-hierarchy")!.setAttribute("disabled", "true");
-        this.shadowRoot!.querySelector("#assign-folders")!.setAttribute("disabled", "true");
+        this.workflowStep = 0;
+        this.updateButtonStates();
+        resetBadgeToDefault();
+    }
+
+    updateButtonStates(): void {
+        const btn0 = this.shadowRoot!.querySelector("#generate-novel-schema") as HTMLButtonElement;
+        const btn1 = this.shadowRoot!.querySelector("#create-classifications") as HTMLButtonElement;
+        const btn2 = this.shadowRoot!.querySelector("#create-hierarchy") as HTMLButtonElement;
+        const btn3 = this.shadowRoot!.querySelector("#assign-folders") as HTMLButtonElement;
+        
+        if (!btn0) return; // Guard
+
+        // Step 0: Initial
+        btn0.disabled = (this.workflowStep !== 0);
+        
+        // Step 1: Ready to Classify (after generating categories or skipping?)
+        // If we want to allow skipping Step 0, we can enable Step 1 always if step <= 1? 
+        btn1.disabled = (this.workflowStep !== 1);
+        btn2.disabled = (this.workflowStep !== 2);
+        btn3.disabled = (this.workflowStep !== 3);
     }
 
     updateStatus(message: string): void {
