@@ -99,5 +99,66 @@ describe("BookmarkChips", () => {
       searchBar.remove();
       bookmarkChips.remove();
     })
+
+    test("getNodePath resolves folder path recursively", async () => {
+        const bookmarkChips = new BookmarkChips();
+        
+        // Mock hierarchy: Root(0) -> Folder A(10) -> Folder B(11) -> Item(12)
+        chrome.bookmarks.get = vi.fn()
+            .mockResolvedValueOnce([{ id: '11', title: 'Folder B', parentId: '10' }]) // First call for Item's parent
+            .mockResolvedValueOnce([{ id: '10', title: 'Folder A', parentId: '0' }])  // Second call for Folder B's parent
+            .mockResolvedValueOnce([{ id: '0', title: '' }]);                         // Third call for Folder A's parent (root)
+
+        const node = { id: '12', title: 'Item', parentId: '11', url: 'http://foo.com' } as chrome.bookmarks.BookmarkTreeNode;
+        
+        const path = await bookmarkChips.getNodePath(node);
+        expect(path).toBe("Folder A » Folder B");
+    });
+
+    test("chips have 3-line tooltip with Title, Path, URL", async () => {
+        const bookmarkChips = new BookmarkChips();
+        const node = { title: "My Bookmark", url: "http://example.com" } as chrome.bookmarks.BookmarkTreeNode;
+        const path = "Folder A » Folder B";
+
+        const chip = bookmarkChips.bookmarkTreeNodeToChip(node, path);
+        
+        expect(chip.title).toBe("My Bookmark\nFolder A » Folder B\nhttp://example.com");
+    });
+
+    test("search results include resolved paths in tooltips", async () => {
+        if (!customElements.get("bookmarks-search-bar")) {
+            customElements.define("bookmarks-search-bar", BookmarkSearchBar);
+        }
+        const searchBar = new BookmarkSearchBar();
+        document.body.appendChild(searchBar);
+        const bookmarkChips = new BookmarkChips();
+        document.body.appendChild(bookmarkChips);
+
+        // search results
+        chrome.bookmarks.search = vi.fn().mockResolvedValue([
+            { id: '100', title: 'Found Item', url: 'http://found.com', parentId: '99' }
+        ]);
+
+        // path resolution calls
+        chrome.bookmarks.get = vi.fn()
+            .mockResolvedValueOnce([{ id: '99', title: 'Parent Folder', parentId: '0' }])
+            .mockResolvedValueOnce([{ id: '0', title: '' }]);
+
+        searchBar.value = "Found";
+        searchBar.inputElement.dispatchEvent(new Event('input'));
+        
+        // Wait for async search and path resolution
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise(resolve => setTimeout(resolve, 0)); // tick for recursive lookups
+
+        const chip = bookmarkChips.querySelector('a');
+        expect(chip).toBeTruthy();
+        expect(chip?.title).toContain("Found Item");
+        expect(chip?.title).toContain("Parent Folder");
+        expect(chip?.title).toContain("http://found.com");
+        
+        searchBar.remove();
+        bookmarkChips.remove();
+    });
 });
   
