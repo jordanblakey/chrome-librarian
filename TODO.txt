@@ -36,5 +36,4 @@ feature: Arrow navigation for chips
 
 # very simple tasks
 ux: options - copy consistency around snapshots (backups?)
-ux: popup - persistent link to classifier, snapshots
 bug: popup - chrome urls blocked when clicking a link

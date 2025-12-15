@@ -19,9 +19,32 @@ body {
     margin: 0;
   }
 
-  &.popup-page h1 {
-    padding: var(--spacing-sm);
-    margin: 0;
+  &.popup-page {
+    .header {
+      display: flex;
+      justify-content: space-between;
+      background: var(--color-primary);
+      nav {
+        display: flex;
+        align-items: stretch;
+        padding-right: var(--spacing-sm);
+        a {
+          color: white;
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
+          padding: var(--spacing-sm);
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+
+    h1 {
+      padding: var(--spacing-sm);
+      margin: 0;
+    }
   }
 }
 

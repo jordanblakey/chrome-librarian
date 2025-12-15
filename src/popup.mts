@@ -14,4 +14,26 @@ export function initPageContent() {
   document.body.appendChild(new TipsBar())
   document.body.appendChild(new BookmarkSearchBar());
   document.body.appendChild(new BookmarkChips());
+  setupNavigationLinks();
+}
+
+function setupNavigationLinks() {
+  const linkClassifier = document.getElementById('link-classifier');
+  const linkSnapshots = document.getElementById('link-snapshots');
+
+  const openOptions = (hash: string) => {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL(`assets/html/options.html${hash}`)
+    });
+  };
+
+  linkClassifier?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openOptions('#classifier');
+  });
+
+  linkSnapshots?.addEventListener('click', (e) => {
+      e.preventDefault();
+      openOptions('#snapshots');
+  });
 }
