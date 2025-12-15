@@ -43,13 +43,14 @@ export default class BookmarkManager extends HTMLElement {
     chrome.storage.local.get(null, (items) => {
       const snapshots = Object.entries(items)
         .filter(([key]) => key.startsWith("bookmarkSnapshot_"))
-        .sort((a, b) => b[0].localeCompare(a[0])); // Sort newest first
+        .sort((a, b) => b[0].localeCompare(a[0])) // Sort newest first
+        .sort((entry) => !(entry[1] as BookmarkSnapshot).isPinned ? 1 : -1)
 
       const listDiv = this.shadowRoot!.querySelector("#snapshots-list")!;
       listDiv.innerHTML = "";
       
       if (snapshots.length === 0) {
-          listDiv.innerHTML = "<p style='color:#777; font-style:italic;'>No snapshots found.</p>";
+          listDiv.innerHTML = "<p class='text-muted'>No snapshots found</p>";
           return;
       }
 
@@ -68,27 +69,33 @@ export default class BookmarkManager extends HTMLElement {
         }
         
         // Analyze the tree for stats
-        const tree = value as chrome.bookmarks.BookmarkTreeNode[];
-        const stats = this.analyzeTree(tree);
+        const bookmarkSnapshot = value as BookmarkSnapshot;
+        const tree = bookmarkSnapshot.tree;
+        const stats = bookmarkSnapshot.stats;
 
         const dateStr = new Date(timestamp).toLocaleString();
 
         const item = document.createElement("li");
         item.className = "snapshot-item";
         item.innerHTML = `
-            <div class="snapshot-info">
-                <span class="snapshot-date">${dateStr}</span>
+            <div class="snapshot-info ${bookmarkSnapshot.isPinned ? "pinned" : ""}">
+                <span class="snapshot-label">
+                  <span class="snapshot-date">${dateStr}</span>
+                  ${bookmarkSnapshot.isPinned ? "<span class='snapshot-pinned'>[Pinned]</span>" : ""}
+                </span>
                 <span class="snapshot-meta">
                    ${stats.bookmarks} Bookmarks, ${stats.folders} Folders<br>
                    Avg Depth: ${stats.avgDepth.toFixed(1)} | Max Depth: ${stats.maxDepth} | Size: ${(JSON.stringify(tree).length / 1024).toFixed(1)} KB
                 </span>
             </div>
             <div class="button-row">
+                <button class="pin-btn">${bookmarkSnapshot.isPinned ? "Unpin" : "Pin"}</button>
                 <button class="restore-btn">Restore</button>
                 <button class="danger delete-btn">Delete</button>
             </div>
         `;
         
+        item.querySelector(".pin-btn")!.addEventListener("click", () => this.pinSnapshot(key));
         item.querySelector(".restore-btn")!.addEventListener("click", () => this.restoreSnapshot(key, dateStr));
         item.querySelector(".delete-btn")!.addEventListener("click", () => this.deleteSnapshot(key));
         
@@ -101,9 +108,23 @@ export default class BookmarkManager extends HTMLElement {
     if (!confirm(`Restoring will create a NEW folder named "Restored - ${dateLabel}". Continue?`)) return;
 
     chrome.storage.local.get(key, (items) => {
-      const tree = items[key] as chrome.bookmarks.BookmarkTreeNode[];
-      if (tree) {
+      const bookmarkSnapshot = items[key] as BookmarkSnapshot;
+      const tree = bookmarkSnapshot.tree;
+      if (bookmarkSnapshot) {
           this.cloneBookmarks(tree, `Restored - ${dateLabel}`);
+      } else {
+          alert("Snapshot data missing!");
+      }
+    });
+  }
+
+  async pinSnapshot(key: string) {
+    chrome.storage.local.get(key, (items) => {
+      const bookmarkSnapshot = items[key] as BookmarkSnapshot;
+      if (bookmarkSnapshot) {
+          bookmarkSnapshot.isPinned = !bookmarkSnapshot.isPinned;
+          chrome.storage.local.set({[key]: bookmarkSnapshot});
+          this.listSnapshots();
       } else {
           alert("Snapshot data missing!");
       }
@@ -133,8 +154,14 @@ export default class BookmarkManager extends HTMLElement {
     const key = `bookmarkSnapshot_${timestamp}`;
     const tree = await chrome.bookmarks.getTree();
     
-    // Store logic
-    await chrome.storage.local.set({[key]: tree});
+    const bookmarkSnapshot: BookmarkSnapshot = {
+      timestamp,
+      isPinned: false,
+      stats: this.analyzeTree(tree),
+      tree,
+    };
+
+    await chrome.storage.local.set({[key]: bookmarkSnapshot});
     toast("Snapshot created!", "success");
     this.listSnapshots();
   }
@@ -192,7 +219,7 @@ export default class BookmarkManager extends HTMLElement {
   }
 
   // Helper to analyze tree statistics
-  analyzeTree(nodes: chrome.bookmarks.BookmarkTreeNode[]): { bookmarks: number, folders: number, maxDepth: number, avgDepth: number } {
+  analyzeTree(nodes: chrome.bookmarks.BookmarkTreeNode[]): BookmarkSnapshotStats {
       let bookmarks = 0;
       let folders = 0;
       let maxDepth = 0;

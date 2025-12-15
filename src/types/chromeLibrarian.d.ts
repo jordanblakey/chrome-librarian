@@ -52,3 +52,17 @@ interface RuntimeMessageResponse extends RuntimeMessage {
 interface RuntimeMessagePrompt extends RuntimeMessage {
   streaming?: boolean;
 }
+
+interface BookmarkSnapshot {
+  timestamp: number,
+  isPinned: boolean,
+  stats: any,
+  tree: chrome.bookmarks.BookmarkTreeNode[],
+}
+
+interface BookmarkSnapshotStats {
+  bookmarks: number,
+  folders: number,
+  maxDepth: number,
+  avgDepth: number,
+}

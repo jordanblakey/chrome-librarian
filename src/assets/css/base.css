@@ -157,6 +157,10 @@ input[type="checkbox"] {
   display: none;
 }
 
+.text-muted {
+  color: var(--color-text-secondary);
+}
+
 .tab-container {
   display: flex;
   margin-bottom: var(--spacing-xl);
