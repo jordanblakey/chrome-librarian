@@ -17,13 +17,13 @@ async function optionsMain() {
 
   const btnClassifier = document.createElement("button");
   btnClassifier.className = "tab-button active";
-  btnClassifier.textContent = "AI Classifier";
-  btnClassifier.dataset.title = "AI Classifier";
+  btnClassifier.textContent = "Auto Shelver";
+  btnClassifier.dataset.title = "Auto Shelver";
   
   const btnSnapshots = document.createElement("button");
   btnSnapshots.className = "tab-button";
-  btnSnapshots.textContent = "Snapshots & Backups";
-  btnSnapshots.dataset.title = "Snapshots & Backups";
+  btnSnapshots.textContent = "Snapshots";
+  btnSnapshots.dataset.title = "Snapshots";
 
   const btnDemos = document.createElement("button");
   btnDemos.className = "tab-button";

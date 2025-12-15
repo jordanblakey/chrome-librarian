@@ -13,13 +13,15 @@ export default class BookmarkManager extends HTMLElement {
           <link rel="stylesheet" href="../../assets/css/base.css">
           <link rel="stylesheet" href="../../assets/css/components.css">
           
-          <h2>Step 0: Snapshots & Backups</h2>
+          <h2>Step 0: Snapshots</h2>
           <p>Save the current state of your bookmarks before organizing. Restore explicitly creates a *new* folder.</p>
           
           <div class="button-row" id="button-bar">
-            <button id="create-snapshot">Create Snapshot</button>
-            <button id="clear-snapshots" class="secondary">Clear All</button>
-            <button id="export-bookmarks" class="secondary">Export Bookmarks</button>
+            <button id="create-snapshot" title="Create a full, moment in time backup of your bookmarks">Create Snapshot</button>
+            <button id="export-snapshots" class="secondary" title="Export all snapshots to a JSON file">Export All</button>
+            <button id="import-snapshots" class="secondary" title="Import all snapshots from a JSON file">Import All</button>
+            <button id="clear-snapshots" class="danger" title="Permanently delete all snapshots">Clear All</button>
+            <!--<button id="export-bookmarks" class="secondary" title="Export all bookmarks to a JSON file">Export Bookmarks</button>-->
           </div>
           
           <ul id="snapshots-list">
@@ -29,9 +31,11 @@ export default class BookmarkManager extends HTMLElement {
     `;
     chrome.storage.onChanged.addListener(storageOnChanged);
     this.listSnapshots();
-    
+
     this.shadowRoot!.querySelector("#create-snapshot")!.addEventListener("click", this.createBookmarkSnapshot.bind(this));
     this.shadowRoot!.querySelector("#clear-snapshots")!.addEventListener("click", this.clearSnapshots.bind(this));
+    this.shadowRoot!.querySelector("#export-snapshots")!.addEventListener("click", this.exportSnapshots.bind(this));
+    this.shadowRoot!.querySelector("#import-snapshots")!.addEventListener("click", this.importSnapshots.bind(this));
     this.shadowRoot!.querySelector("#export-bookmarks")!.addEventListener("click", exportBookmarks);
   }
 
@@ -48,10 +52,10 @@ export default class BookmarkManager extends HTMLElement {
 
       const listDiv = this.shadowRoot!.querySelector("#snapshots-list")!;
       listDiv.innerHTML = "";
-      
+
       if (snapshots.length === 0) {
-          listDiv.innerHTML = "<p class='text-muted'>No snapshots found</p>";
-          return;
+        listDiv.innerHTML = "<p class='text-muted'>No snapshots found</p>";
+        return;
       }
 
       snapshots.forEach(([key, value]) => {
@@ -62,12 +66,12 @@ export default class BookmarkManager extends HTMLElement {
 
         // Handle migration/legacy format where value is just the array
         if (Array.isArray(value)) {
-            timestamp = parseInt(key.replace("bookmarkSnapshot_", ""), 10);
+          timestamp = parseInt(key.replace("bookmarkSnapshot_", ""), 10);
         } else {
-             // Future proof: if we start storing object wrapper
-             timestamp = parseInt(key.replace("bookmarkSnapshot_", ""), 10);
+          // Future proof: if we start storing object wrapper
+          timestamp = parseInt(key.replace("bookmarkSnapshot_", ""), 10);
         }
-        
+
         // Analyze the tree for stats
         const bookmarkSnapshot = value as BookmarkSnapshot;
         const tree = bookmarkSnapshot.tree;
@@ -81,7 +85,7 @@ export default class BookmarkManager extends HTMLElement {
             <div class="snapshot-info ${bookmarkSnapshot.isPinned ? "pinned" : ""}">
                 <span class="snapshot-label">
                   <span class="snapshot-date">${dateStr}</span>
-                  ${bookmarkSnapshot.isPinned ? "<span class='snapshot-pinned'>[Pinned]</span>" : ""}
+                  ${bookmarkSnapshot.isPinned ? "<span class='snapshot-pinned'>Pinned</span>" : ""}
                 </span>
                 <span class="snapshot-meta">
                    ${stats.bookmarks} Bookmarks, ${stats.folders} Folders<br>
@@ -89,16 +93,16 @@ export default class BookmarkManager extends HTMLElement {
                 </span>
             </div>
             <div class="button-row">
-                <button class="pin-btn">${bookmarkSnapshot.isPinned ? "Unpin" : "Pin"}</button>
+                <button class="secondary pin-btn">${bookmarkSnapshot.isPinned ? "Unpin" : "Pin"}</button>
                 <button class="restore-btn">Restore</button>
                 <button class="danger delete-btn">Delete</button>
             </div>
         `;
-        
+
         item.querySelector(".pin-btn")!.addEventListener("click", () => this.pinSnapshot(key));
         item.querySelector(".restore-btn")!.addEventListener("click", () => this.restoreSnapshot(key, dateStr));
         item.querySelector(".delete-btn")!.addEventListener("click", () => this.deleteSnapshot(key));
-        
+
         listDiv.appendChild(item);
       });
     });
@@ -111,9 +115,9 @@ export default class BookmarkManager extends HTMLElement {
       const bookmarkSnapshot = items[key] as BookmarkSnapshot;
       const tree = bookmarkSnapshot.tree;
       if (bookmarkSnapshot) {
-          this.cloneBookmarks(tree, `Restored - ${dateLabel}`);
+        this.cloneBookmarks(tree, `Restored - ${dateLabel}`);
       } else {
-          alert("Snapshot data missing!");
+        alert("Snapshot data missing!");
       }
     });
   }
@@ -122,24 +126,24 @@ export default class BookmarkManager extends HTMLElement {
     chrome.storage.local.get(key, (items) => {
       const bookmarkSnapshot = items[key] as BookmarkSnapshot;
       if (bookmarkSnapshot) {
-          bookmarkSnapshot.isPinned = !bookmarkSnapshot.isPinned;
-          chrome.storage.local.set({[key]: bookmarkSnapshot});
-          this.listSnapshots();
+        bookmarkSnapshot.isPinned = !bookmarkSnapshot.isPinned;
+        chrome.storage.local.set({ [key]: bookmarkSnapshot });
+        this.listSnapshots();
       } else {
-          alert("Snapshot data missing!");
+        alert("Snapshot data missing!");
       }
     });
   }
-  
+
   async deleteSnapshot(key: string) {
-      if (!confirm("Delete this snapshot permanently?")) return;
-      await chrome.storage.local.remove(key);
-      this.listSnapshots();
+    if (!confirm("Delete this snapshot permanently?")) return;
+    await chrome.storage.local.remove(key);
+    this.listSnapshots();
   }
 
   async clearSnapshots() {
     if (!confirm("Are you sure you want to delete ALL snapshots?")) return;
-    
+
     await chrome.storage.local.get(null, async (items) => {
       const snapshots = Object.entries(items).filter(([key]) => key.startsWith("bookmarkSnapshot_"));
       for (const [key] of snapshots) {
@@ -149,11 +153,44 @@ export default class BookmarkManager extends HTMLElement {
     });
   }
 
+  async importSnapshots() {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".json";
+    fileInput.addEventListener("change", async (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      const snapshots = JSON.parse(text);
+      for (const [key, value] of snapshots) {
+        chrome.storage.local.set({ [key]: value });
+      }
+      this.listSnapshots();
+    });
+    fileInput.click();
+  }
+
+  async exportSnapshots() {
+    chrome.storage.local.get(null, (items) => {
+      const snapshots = Object.entries(items).filter(([key]) => key.startsWith("bookmarkSnapshot_"));
+      const json = JSON.stringify(snapshots);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const fileTimestamp = new Date().toISOString().replaceAll(':','-').replace('T','_').slice(0, 19)
+
+      chrome.downloads.download({
+        url: url,
+        filename: `${snapshots.length}_bookmark_snapshots_${fileTimestamp}.json`,
+        saveAs: true
+      });
+    })
+  }
+
   async createBookmarkSnapshot() {
     const timestamp = Date.now();
     const key = `bookmarkSnapshot_${timestamp}`;
     const tree = await chrome.bookmarks.getTree();
-    
+
     const bookmarkSnapshot: BookmarkSnapshot = {
       timestamp,
       isPinned: false,
@@ -161,99 +198,99 @@ export default class BookmarkManager extends HTMLElement {
       tree,
     };
 
-    await chrome.storage.local.set({[key]: bookmarkSnapshot});
+    await chrome.storage.local.set({ [key]: bookmarkSnapshot });
     toast("Snapshot created!", "success");
     this.listSnapshots();
   }
 
   async cloneBookmarks(tree: chrome.bookmarks.BookmarkTreeNode[], folderName: string) {
     try {
-        const restoreFolder = await chrome.bookmarks.create({
-          title: folderName,
-          parentId: "1", // '1' is typically Bookmarks Bar. '2' is Other Bookmarks. 
-        });
+      const restoreFolder = await chrome.bookmarks.create({
+        title: folderName,
+        parentId: "1", // '1' is typically Bookmarks Bar. '2' is Other Bookmarks. 
+      });
 
-        const queue: chrome.bookmarks.BookmarkTreeNode[] = [];
-        // tree[0] is root. tree[0].children are top level folders.
-        if (tree[0] && tree[0].children) {
-            queue.push(...tree[0].children);
-        }
+      const queue: chrome.bookmarks.BookmarkTreeNode[] = [];
+      // tree[0] is root. tree[0].children are top level folders.
+      if (tree[0] && tree[0].children) {
+        queue.push(...tree[0].children);
+      }
 
-        while (queue.length > 0) {
-          const node = queue.shift()!;
-          await this.createBookmark(node, restoreFolder.id);
-        }
-        
-        toast(`Snapshost restored to folder: "${folderName}"`, "success");
-        
+      while (queue.length > 0) {
+        const node = queue.shift()!;
+        await this.createBookmark(node, restoreFolder.id);
+      }
+
+      toast(`Snapshost restored to folder: "${folderName}"`, "success");
+
     } catch (e) {
-        console.error(e);
-        toast("Error restoring snapshot. Check console.", "error");
+      console.error(e);
+      toast("Error restoring snapshot. Check console.", "error");
     }
   }
 
   async createBookmark(node: chrome.bookmarks.BookmarkTreeNode, parentId: string) {
     // Only create bookmark/folder if it has a title (skipping root usually)
     // Actually, we want to recreate the folder structure.
-    
+
     const clone: any = {
-        parentId: parentId,
-        title: node.title
+      parentId: parentId,
+      title: node.title
     };
-    
+
     if (node.url) {
-        clone.url = node.url;
+      clone.url = node.url;
     }
 
     try {
-        const newBookmark = await chrome.bookmarks.create(clone);
-        
-        if (node.children) {
-          for (const child of node.children) {
-            await this.createBookmark(child, newBookmark.id);
-          }
+      const newBookmark = await chrome.bookmarks.create(clone);
+
+      if (node.children) {
+        for (const child of node.children) {
+          await this.createBookmark(child, newBookmark.id);
         }
+      }
     } catch (err) {
-        console.warn("Skipping node creation:", node.title, err);
+      console.warn("Skipping node creation:", node.title, err);
     }
   }
 
   // Helper to analyze tree statistics
   analyzeTree(nodes: chrome.bookmarks.BookmarkTreeNode[]): BookmarkSnapshotStats {
-      let bookmarks = 0;
-      let folders = 0;
-      let maxDepth = 0;
-      let totalBookmarkDepth = 0;
+    let bookmarks = 0;
+    let folders = 0;
+    let maxDepth = 0;
+    let totalBookmarkDepth = 0;
 
-      const traverse = (node: chrome.bookmarks.BookmarkTreeNode, depth: number) => {
-          // Adjust depth so Bookmarks Bar contents (depth 2) are depth 0.
-          // Root (0) -> Bar (1) -> Content (2) => 0
-          const relativeDepth = Math.max(0, depth - 2);
-          
-          if (relativeDepth > maxDepth) maxDepth = relativeDepth;
-          
-          if (node.url) {
-              bookmarks++;
-              totalBookmarkDepth += relativeDepth;
-          } else {
-              folders++;
-          }
+    const traverse = (node: chrome.bookmarks.BookmarkTreeNode, depth: number) => {
+      // Adjust depth so Bookmarks Bar contents (depth 2) are depth 0.
+      // Root (0) -> Bar (1) -> Content (2) => 0
+      const relativeDepth = Math.max(0, depth - 2);
 
-          if (node.children) {
-              for (const child of node.children) {
-                  traverse(child, depth + 1);
-              }
-          }
-      };
-      
-      // Start traversal for each top-level node (usually 'root')
-      for (const node of nodes) {
-          traverse(node, 0);
+      if (relativeDepth > maxDepth) maxDepth = relativeDepth;
+
+      if (node.url) {
+        bookmarks++;
+        totalBookmarkDepth += relativeDepth;
+      } else {
+        folders++;
       }
-      
-      const avgDepth = bookmarks > 0 ? totalBookmarkDepth / bookmarks : 0;
-      
-      return { bookmarks, folders, maxDepth, avgDepth };
+
+      if (node.children) {
+        for (const child of node.children) {
+          traverse(child, depth + 1);
+        }
+      }
+    };
+
+    // Start traversal for each top-level node (usually 'root')
+    for (const node of nodes) {
+      traverse(node, 0);
+    }
+
+    const avgDepth = bookmarks > 0 ? totalBookmarkDepth / bookmarks : 0;
+
+    return { bookmarks, folders, maxDepth, avgDepth };
   }
 }
 

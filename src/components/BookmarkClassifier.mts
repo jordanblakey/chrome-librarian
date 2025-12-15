@@ -29,7 +29,7 @@ export default class BookmarkClassifier extends HTMLElement {
                 <link rel="stylesheet" href="../../assets/css/base.css">
                 <link rel="stylesheet" href="../../assets/css/components.css">
                 
-                <h2>Bookmark Classifier</h2>
+                <h2>Auto Shelver</h2>
                 <p>Create a folder hierarchy based on the metadata of all bookmarks.</p>
                 <div id="button-bar">
                 <button id="generate-novel-schema">0. Generate Categories</button>

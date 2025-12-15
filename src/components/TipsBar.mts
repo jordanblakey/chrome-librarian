@@ -13,7 +13,7 @@ export default class TipsBar extends HTMLElement {
     "Press <b>Alt + S</b> to search your bookmark library anywhere.",
     "Experiment with <b>Session Type</b> dropdown to get different results.",
     "Restore your bookmarks from a point in time using <b>Snapshots</b>.",
-    "Use the AI Classifier to <b>automatically categorize your bookmarks</b>."
+    "Use the Auto Shelver to <b>automatically categorize your bookmarks</b>."
   ]
 
   getRandomTip() {
