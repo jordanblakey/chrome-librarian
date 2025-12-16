@@ -21,8 +21,4 @@ feature: improve generated classifications by doing this in batches:
   (say 10 batches of 15 so 150 categories generated independently)
   then generate the final 15 classifications based on the most common from the 150
   this can fix the context size limitation for the Prompt
-
-# SNAPSHOTS
-feature: options
-  sliding window of daily snapshots (e.g. 7 days).
-  possibly 2 columns, or tabs for auto and manual snapshots
+ux: It's cool to see the classification progress in the UI. But why not automatically proceed through the steps, requiring only one click?
