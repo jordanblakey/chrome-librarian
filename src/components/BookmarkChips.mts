@@ -30,7 +30,119 @@ export default class BookmarkChips extends HTMLElement {
     window.addEventListener('keydown', (e) => e.key === 'Control' ? this.isCtrlPressed = true : null);
     window.addEventListener('keyup', (e) => e.key === 'Control' ? this.isCtrlPressed = false : null);
 
+    this.addEventListener('keydown', this.handleKeyDown.bind(this));
+    
+    // Add logic to focus first chip when pressing Down in search bar
+    if (this.searchInput && this.searchInput.inputElement) {
+        this.searchInput.inputElement.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const chips = Array.from(this.children) as HTMLElement[];
+                if (chips.length > 0) {
+                    chips[0].focus();
+                }
+            }
+        });
+    }
+
     this.handleNullQuery();
+  }
+
+  handleKeyDown(e: KeyboardEvent) {
+    const target = e.target as HTMLElement;
+    if (!target.classList.contains('bookmark-chip')) return;
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const next = target.nextElementSibling as HTMLElement;
+      if (next) next.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prev = target.previousElementSibling as HTMLElement;
+      if (prev) prev.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      this.focusNextRow(target, 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      this.focusNextRow(target, -1);
+    } else if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey && e.key !== ' ') {
+      this.searchInput?.inputElement?.focus();
+    }
+  }
+
+  focusNextRow(current: HTMLElement, direction: 1 | -1) {
+    const chips = Array.from(this.children) as HTMLElement[];
+    const currentRect = current.getBoundingClientRect();
+    const currentCenter = currentRect.left + currentRect.width / 2;
+    const rowThreshold = 5;
+
+    // Filter candidates strictly above or below
+    const candidates = chips.filter(chip => {
+        const rect = chip.getBoundingClientRect();
+        if (direction === 1) {
+            return rect.top >= currentRect.bottom - rowThreshold;
+        } else {
+            return rect.bottom <= currentRect.top + rowThreshold;
+        }
+    });
+
+    if (candidates.length === 0) {
+        if (direction === -1) {
+             this.searchInput?.inputElement?.focus();
+        }
+        return;
+    }
+
+    // Group candidates by their vertical position (row)
+    // Map Y-coord -> Chips[]
+    const rows = new Map<number, HTMLElement[]>();
+    
+    for (const chip of candidates) {
+       const rect = chip.getBoundingClientRect();
+       const y = direction === 1 ? rect.top : rect.bottom; // use appropriate edge
+       
+       // Find an existing row key that is close enough
+       let foundKey: number | null = null;
+       for (const key of rows.keys()) {
+           if (Math.abs(key - y) < rowThreshold) {
+               foundKey = key;
+               break;
+           }
+       }
+       
+       if (foundKey !== null) {
+           rows.get(foundKey)?.push(chip);
+       } else {
+           rows.set(y, [chip]);
+       }
+    }
+
+    // Sort row keys by distance from current chip
+    const sortedKeys = Array.from(rows.keys()).sort((a, b) => {
+         const distA = Math.abs(a - (direction === 1 ? currentRect.bottom : currentRect.top));
+         const distB = Math.abs(b - (direction === 1 ? currentRect.bottom : currentRect.top));
+         return distA - distB;
+    });
+    
+    // Get the closest row
+    const bestRow = rows.get(sortedKeys[0])!;
+    
+    // Find closest horizontal match in that row
+    let bestMatch = bestRow[0];
+    let minDist = Infinity;
+
+    for (const chip of bestRow) {
+        const rect = chip.getBoundingClientRect();
+        const center = rect.left + rect.width / 2;
+        const dist = Math.abs(center - currentCenter);
+        if (dist < minDist) {
+            minDist = dist;
+            bestMatch = chip;
+        }
+    }
+
+    bestMatch?.focus();
   }
 
   async handleNullQuery() {
@@ -92,6 +204,19 @@ export default class BookmarkChips extends HTMLElement {
           active: !this.isCtrlPressed
         });
       }
+    });
+
+    // Handle Space to open link, respecting Ctrl key (so active status is correct)
+    chip.addEventListener('keydown', (e) => {
+        if (e.key === ' ') {
+            e.preventDefault();
+            if (node.url) {
+                chrome.tabs.create({
+                    url: node.url,
+                    active: !e.ctrlKey
+                });
+            }
+        }
     });
 
     const span = document.createElement('span')
