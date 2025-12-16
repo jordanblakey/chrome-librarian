@@ -113,7 +113,6 @@ select {
   background-color: var(--color-background-main);
   border-radius: var(--border-radius-sm);
   min-width: var(--input-min-width);
-  cursor: pointer;
 }
 
 textarea.auto-resize {
@@ -128,6 +127,7 @@ select {
   min-width: var(--input-min-width);
   display: inline-flex;
   align-items: center;
+  cursor: pointer;
 
   &::picker(select) {
     appearance: base-select;

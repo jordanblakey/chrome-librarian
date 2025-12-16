@@ -208,12 +208,12 @@ export default class BookmarkChips extends HTMLElement {
 
     // Handle Space to open link, respecting Ctrl key (so active status is correct)
     chip.addEventListener('keydown', (e) => {
-        if (e.key === ' ') {
+        if (e.key === ' ' || e.code === 'Space') {
             e.preventDefault();
             if (node.url) {
                 chrome.tabs.create({
                     url: node.url,
-                    active: !e.ctrlKey
+                    active: !this.isCtrlPressed
                 });
             }
         }

@@ -223,8 +223,12 @@ describe("BookmarkChips", () => {
         expect(chrome.tabs.create).toHaveBeenCalledWith({ url: "http://space.com", active: true });
 
         // Test Ctrl+Space
-        chip.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', ctrlKey: true, bubbles: true }));
+        // Simulate window Ctrl press to update isCtrlPressed state
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Control' }));
+        chip.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', ctrlKey: true, bubbles: true }));
         expect(chrome.tabs.create).toHaveBeenCalledWith({ url: "http://space.com", active: false });
+        // Release Ctrl
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Control' }));
 
         bookmarkChips.remove();
     });
@@ -279,20 +283,6 @@ describe("BookmarkChips", () => {
         const chip = document.createElement('a');
         chip.classList.add('bookmark-chip');
         chip.tabIndex = 0;
-        document.body.appendChild(chip);
-        chip.focus();
-        
-        // Simulating bubbling: the chip needs to be inside the bookmarkChips component to bubble to it?
-        // Wait, in previous successful test runs (before I edited), it was working?
-        // Ah, in previous runs "typing focuses search input" passed!
-        // What changed?
-        // I changed the test setup? 
-        // "const chip = document.createElement('a'); ... document.body.appendChild(chip);"
-        // The chip is NOT inside bookmarkChips!
-        // BookmarkChips listener is on `this` (itself). 
-        // If chip is in body, event bubbles to body, not bookmarkChips.
-        // I must append chip to bookmarkChips.
-        
         bookmarkChips.appendChild(chip);
         chip.focus();
 
