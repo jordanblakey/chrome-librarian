@@ -101,6 +101,9 @@
             margin-bottom: var(--spacing-sm);
             border-radius: var(--border-radius-sm);
             background: var(--color-background-offset);
+            &.pinned {
+                background-color: var(--color-background-success);
+            }
         }
 
         .snapshot-info {
@@ -121,13 +124,16 @@
                 font-weight: bold;
                 color: var(--color-success);
             }
+            .snapshot-name {
+                font-weight: bold;
+                color: var(--color-text-main);
+            }
         }
 
         .snapshot-meta {
             font-size: 0.85em;
             color: var(--color-text-secondary);
         }
-
     }
 
     .bookmark-classifier {

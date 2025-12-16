@@ -56,6 +56,7 @@ interface RuntimeMessagePrompt extends RuntimeMessage {
 interface BookmarkSnapshot {
   timestamp: number,
   isPinned: boolean,
+  title?: string,
   stats: any,
   tree: chrome.bookmarks.BookmarkTreeNode[],
 }

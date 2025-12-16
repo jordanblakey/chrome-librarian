@@ -81,10 +81,14 @@ export default class BookmarkManager extends HTMLElement {
 
         const item = document.createElement("li");
         item.className = "snapshot-item";
+        if (bookmarkSnapshot.isPinned) {
+          item.classList.add("pinned");
+        }
         item.innerHTML = `
-            <div class="snapshot-info ${bookmarkSnapshot.isPinned ? "pinned" : ""}">
+            <div class="snapshot-info">
                 <span class="snapshot-label">
                   <span class="snapshot-date">${dateStr}</span>
+                  ${bookmarkSnapshot.title ? `<span class='snapshot-name'>"${bookmarkSnapshot.title}"</span>` : ""}
                   ${bookmarkSnapshot.isPinned ? "<span class='snapshot-pinned'>Pinned</span>" : ""}
                 </span>
                 <span class="snapshot-meta">
@@ -126,7 +130,21 @@ export default class BookmarkManager extends HTMLElement {
     chrome.storage.local.get(key, (items) => {
       const bookmarkSnapshot = items[key] as BookmarkSnapshot;
       if (bookmarkSnapshot) {
-        bookmarkSnapshot.isPinned = !bookmarkSnapshot.isPinned;
+        if (!bookmarkSnapshot.isPinned) {
+          // User is attempting to PIN
+          const title = prompt("Name your bookmark snapshot?", bookmarkSnapshot.title || "");
+          if (title !== null) {
+              bookmarkSnapshot.isPinned = true;
+              bookmarkSnapshot.title = title;
+          } else {
+              // User cancelled prompt, do nothing
+              return;
+          }
+        } else {
+          // User is attempting to UNPIN
+          bookmarkSnapshot.isPinned = false;
+          // Title persists
+        }
         chrome.storage.local.set({ [key]: bookmarkSnapshot });
         this.listSnapshots();
       } else {
