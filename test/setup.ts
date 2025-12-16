@@ -16,5 +16,8 @@ vi.stubGlobal("chrome", {
     onCommand: {
       addListener: vi.fn()
     }
+  },
+  tabs: {
+    create: vi.fn()
   }
 });

@@ -77,6 +77,14 @@ export default class BookmarkChips extends HTMLElement {
     chip.title = `${node.title}\n${path}\n${node.url}`;
     
     chip.setAttribute('href', node.url || '');
+    
+    chip.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (node.url) {
+        chrome.tabs.create({ url: node.url });
+      }
+    });
+
     const span = document.createElement('span')
     span.textContent = node.title;
     span.classList.add('chip-title');

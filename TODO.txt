@@ -32,6 +32,3 @@ feature: options
 # simple tasks
 feature: system notification when tasks complete (primarily classifications).
 feature: Arrow navigation for chips, typing refocuses the input
-
-# very simple tasks
-bug: popup - chrome urls blocked when clicking a link

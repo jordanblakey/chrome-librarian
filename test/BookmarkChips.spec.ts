@@ -160,5 +160,18 @@ describe("BookmarkChips", () => {
         searchBar.remove();
         bookmarkChips.remove();
     });
+
+    test("clicking a chip opens the URL in a new tab via chrome.tabs.create", async () => {
+        const bookmarkChips = new BookmarkChips();
+        const node = { title: "Click Me", url: "http://click.com" } as chrome.bookmarks.BookmarkTreeNode;
+        const path = "Some Path";
+        
+        const chip = bookmarkChips.bookmarkTreeNodeToChip(node, path);
+        
+        // Simulate click
+        chip.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        
+        expect(chrome.tabs.create).toHaveBeenCalledWith({ url: "http://click.com" });
+    });
 });
   
