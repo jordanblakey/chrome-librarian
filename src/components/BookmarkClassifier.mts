@@ -127,7 +127,7 @@ export default class BookmarkClassifier extends HTMLElement {
                 this.updateStatus("Failed to generate categories from sample.");
             } else {
                 this.updateStatus(`Generated ${newCategories.length} novel categories | Time: ${totalTimeSeconds}s`);
-                this.displayResults(newCategories, "Novel Categories");
+                this.displayResults(newCategories, "Step 0: Generate Categories - Done");
                 this.activeSchema = createClassificationSchema(newCategories);
             }
         } catch (error) {
@@ -244,7 +244,7 @@ ${chunk.join('\n')}
             const avgBatchTime = batchDurations.reduce((a, b) => a + b, 0) / batchDurations.length || 0;
             
             this.updateStatus(`Classification complete | Input: ${this.originalBookmarksMap.size} | Organized: ${this.allClusteredData.length} | Total Time: ${(totalTime / 1000).toFixed(2)}s | Avg Batch: ${(avgBatchTime / 1000).toFixed(2)}s`);
-            this.displayResults(this.allClusteredData);
+            this.displayResults(this.allClusteredData, "Step 1: Categorize Bookmarks - Done");
             stopSpinner();
             showBadgeSuccess();
             chrome.notifications.create({
@@ -303,7 +303,7 @@ ${chunk.join('\n')}
         await new Promise(resolve => setTimeout(resolve, 500));
 
         this.updateStatus("Hierarchy generated successfully (Direct Mapping).");
-        this.displayResults(folderHierarchy, "Final Folder Hierarchy");
+        this.displayResults(folderHierarchy, "Step 2: Create Folders - Done");
         stopSpinner();
         showBadgeSuccess();
         this.workflowStep = 3;
@@ -386,7 +386,19 @@ ${chunk.join('\n')}
                 }
             }
 
-            this.updateStatus(`Success! Copied ${moveCount} bookmarks to "Bookmarks Bar > AI Organized (${timestamp})".`);
+            const destination = `Bookmarks Bar » AI Organized (${timestamp})`;
+            this.displayResults({ 
+                moved_count: moveCount, 
+                destination 
+            }, "Step 3: Organize Bookmarks - Done");
+
+            const resultsDiv = this.shadowRoot!.querySelector("#results") as HTMLElement;
+            const h2 = document.createElement("h2");
+            h2.innerText = `Done!Auto shelved ${moveCount} bookmarks into "${destination}"`;
+            h2.style.color = "var(--color-primary)"; // Optional: Make it stand out
+            h2.style.marginTop = "var(--spacing-lg)";
+            resultsDiv.prepend(h2);
+
             stopSpinner();
             showBadgeSuccess();
         } catch (error) {
@@ -395,6 +407,7 @@ ${chunk.join('\n')}
             stopSpinner();
             showBadgeError();
         }
+        
         // Even if some failed, we mark as done to prevent double click
         this.workflowStep = 4;
         this.updateButtonStates();
@@ -404,6 +417,8 @@ ${chunk.join('\n')}
     clearClassifications(): void {
         this.allClusteredData = [];
         this.folderHierarchy = null;
+        const resultsDiv = this.shadowRoot!.querySelector("#results") as HTMLElement;
+        resultsDiv.innerHTML = ""; // Clear visual log
         this.updateStatus("Data Cleared.");
         this.workflowStep = 0;
         this.updateButtonStates();
@@ -431,13 +446,31 @@ ${chunk.join('\n')}
     updateStatus(message: string): void {
         const resultsDiv = this.shadowRoot!.querySelector("#results") as HTMLElement;
         const timestamp = new Date().toLocaleTimeString();
-        resultsDiv.innerHTML = `<p>[${timestamp}] ${message}</p>`; // Use innerHTML to replace status
+        const p = document.createElement("p");
+        p.innerText = `[${timestamp}] ${message}`;
+        resultsDiv.prepend(p);
     }
 
     displayResults(data: any, title = "Clustering Results"): void {
         const resultsDiv = this.shadowRoot!.querySelector("#results") as HTMLElement;
-        const jsonString = JSON.stringify(data, null, 2);
-        resultsDiv.innerHTML += `<h3>${title}</h3><pre>${jsonString}</pre>`; 
+        
+        let content = "";
+        if (Array.isArray(data)) {
+            // "Single line for each"
+            if (data.length > 20) {
+                const head = data.slice(0, 10).map(item => JSON.stringify(item)).join('\n');
+                const tail = data.slice(-10).map(item => JSON.stringify(item)).join('\n');
+                content = `${head}\n... ${data.length - 20} more rows ...\n${tail}`;
+            } else {
+                content = data.map(item => JSON.stringify(item)).join('\n');
+            }
+        } else {
+            content = JSON.stringify(data, null, 2);
+        }
+
+        const div = document.createElement("div");
+        div.innerHTML = `<h3>${title}</h3><pre>${content}</pre>`;
+        resultsDiv.prepend(div);
     }
 
     private processBookmarks(nodes: chrome.bookmarks.BookmarkTreeNode[]): string[] {

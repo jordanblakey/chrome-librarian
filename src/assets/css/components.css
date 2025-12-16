@@ -141,11 +141,21 @@
             margin-top: var(--spacing-md);
             white-space: pre-wrap;
             /* Preserve whitespace for JSON display */
-            font-size: 0.9em;
+            /* font-size: var(--font-size-sm); */
             background: var(--color-background-main);
             padding: var(--spacing-md);
             border: 1px solid #cccccc;
+
+            pre {
+                font-size: var(--font-size-xs);
+            }
+
+            p {
+                font-size: var(--font-size-xs);
+                margin: 0;
+            }
         }
+
     }
 
     .bookmark-title-generator-demo {

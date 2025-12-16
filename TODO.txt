@@ -22,3 +22,4 @@ feature: improve generated classifications by doing this in batches:
   then generate the final 15 classifications based on the most common from the 150
   this can fix the context size limitation for the Prompt
 ux: It's cool to see the classification progress in the UI. But why not automatically proceed through the steps, requiring only one click?
+ux: Should not be able to restart the step after pressing it once without clearing the data first (button should turn yellow or green)
