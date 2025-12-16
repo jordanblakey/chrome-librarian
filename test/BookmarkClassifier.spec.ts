@@ -47,6 +47,10 @@ describe("BookmarkClassifier", () => {
         mockSession = {
             prompt: vi.fn().mockResolvedValue(JSON.stringify({ categories: ["Test"] })),
             destroy: vi.fn(),
+            clone: vi.fn().mockResolvedValue({
+                prompt: vi.fn().mockResolvedValue(JSON.stringify({ classifications: ["1:Test"] })),
+                destroy: vi.fn()
+            })
         };
         (window as any).LanguageModel = {
             create: vi.fn().mockResolvedValue(mockSession)
@@ -118,6 +122,31 @@ describe("BookmarkClassifier", () => {
         } else {
              expect(promptCall).toContain(`Folder: ${longTitle}`);
         }
+
+        classifier.remove();
+    });
+
+    test("creates a notification when classification completes", async () => {
+        const classifier = new BookmarkClassifier();
+        document.body.appendChild(classifier);
+
+        // Manually trigger the classification process
+        // We need to bypass the button click and call logic directly or simulate click
+        // But first, we need to ensure the schema generation or skipped step 0 state
+        // Let's assume we can jump to step 1 via setting internal state if it was public,
+        // or just calling createClassifications directly.
+        
+        await classifier.createClassifications();
+
+        // Check if notification was created
+        expect(chrome.notifications.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                type: 'basic',
+                title: 'Chrome Librarian: Categorization Complete',
+                message: 'Return to finish shelving your library.',
+                iconUrl: 'chrome-extension://cfjmopenafkbgilpppcnfgajbkheaccn/assets/icons/icon-128.png'
+            })
+        );
 
         classifier.remove();
     });

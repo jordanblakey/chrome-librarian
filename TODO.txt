@@ -26,9 +26,3 @@ feature: improve generated classifications by doing this in batches:
 feature: options
   sliding window of daily snapshots (e.g. 7 days).
   possibly 2 columns, or tabs for auto and manual snapshots
-
-================================================================================
-
-# simple tasks
-feature: system notification when tasks complete (primarily classifications).
-feature: Arrow navigation for chips, typing refocuses the input

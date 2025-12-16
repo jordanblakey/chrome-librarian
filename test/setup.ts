@@ -7,7 +7,7 @@ vi.stubGlobal("chrome", {
     getTree: vi.fn(() => Promise.resolve([]))
   },
   runtime: {
-    getURL: vi.fn(() => "chrome-extension://cfjmopenafkbgilpppcnfgajbkheaccn/")
+    getURL: vi.fn((path) => `chrome-extension://cfjmopenafkbgilpppcnfgajbkheaccn/${path}`)
   },
   downloads: {
     download: vi.fn()
@@ -18,6 +18,9 @@ vi.stubGlobal("chrome", {
     }
   },
   tabs: {
+    create: vi.fn()
+  },
+  notifications: {
     create: vi.fn()
   }
 });

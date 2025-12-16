@@ -244,6 +244,12 @@ ${chunk.join('\n')}
             this.displayResults(this.allClusteredData);
             stopSpinner();
             showBadgeSuccess();
+            chrome.notifications.create({
+                type: 'basic',
+                iconUrl: chrome.runtime.getURL('assets/icons/icon-128.png'),
+                title: 'Chrome Librarian: Categorization Complete',
+                message: 'Return to finish shelving your library.'
+            });
             this.workflowStep = 2;
             this.updateButtonStates();
         } catch (error) {
