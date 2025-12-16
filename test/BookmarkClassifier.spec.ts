@@ -63,7 +63,13 @@ describe("BookmarkClassifier", () => {
                  ...actual,
                  startExtensionSpinner: vi.fn(() => vi.fn()),
                  showBadgeSuccess: vi.fn(),
-                 getWeightedBookmarkSample: vi.fn((tree) => {
+             };
+        });
+        
+        // Mock treeUtils
+        vi.mock('../src/utils/treeUtils.mjs', () => {
+            return {
+                getWeightedBookmarkSample: vi.fn((tree) => {
                      // Flatten the mock tree for the sample mock
                      return [
                          mockBookmarksResponse[0].children![0],

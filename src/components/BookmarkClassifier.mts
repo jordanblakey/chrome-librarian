@@ -1,6 +1,7 @@
 import { CLASSIFY_BOOKMARKS_SYSTEM_PROMPT, GENERATE_CATEGORIES_SYSTEM_PROMPT } from "../data/systemPrompts.mjs";
 import { BOOKMARK_CLASSIFICATION_JSON_SCHEMA, GENERATE_CATEGORIES_JSON_SCHEMA, createClassificationSchema } from "../data/responseConstraintSchemas.mjs";
-import { showBadgeError, showBadgeSuccess, startExtensionSpinner, resetBadgeToDefault, getWeightedBookmarkSample } from "../utils/common.mjs";
+import { showBadgeError, showBadgeSuccess, startExtensionSpinner, resetBadgeToDefault } from "../utils/common.mjs";
+import { getWeightedBookmarkSample } from "../utils/treeUtils.mjs";
 
 const BATCH_SIZE = 10;
 

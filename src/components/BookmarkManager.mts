@@ -1,5 +1,5 @@
-import { exportBookmarks } from "../utils/exportBookmarks.mjs";
 import { storageOnChanged, toast } from "../utils/common.mjs";
+import { analyzeTree } from "../utils/treeUtils.mjs";
 
 export default class BookmarkManager extends HTMLElement {
   constructor() {
@@ -21,7 +21,6 @@ export default class BookmarkManager extends HTMLElement {
             <button id="export-snapshots" class="secondary" title="Export all snapshots to a JSON file">Export All</button>
             <button id="import-snapshots" class="secondary" title="Import all snapshots from a JSON file">Import All</button>
             <button id="clear-snapshots" class="danger" title="Permanently delete all snapshots">Clear All</button>
-            <!--<button id="export-bookmarks" class="secondary" title="Export all bookmarks to a JSON file">Export Bookmarks</button>-->
           </div>
           
           <ul id="snapshots-list">
@@ -36,7 +35,6 @@ export default class BookmarkManager extends HTMLElement {
     this.shadowRoot!.querySelector("#clear-snapshots")!.addEventListener("click", this.clearSnapshots.bind(this));
     this.shadowRoot!.querySelector("#export-snapshots")!.addEventListener("click", this.exportSnapshots.bind(this));
     this.shadowRoot!.querySelector("#import-snapshots")!.addEventListener("click", this.importSnapshots.bind(this));
-    this.shadowRoot!.querySelector("#export-bookmarks")!.addEventListener("click", exportBookmarks);
   }
 
   disconnectedCallback() {
@@ -212,7 +210,7 @@ export default class BookmarkManager extends HTMLElement {
     const bookmarkSnapshot: BookmarkSnapshot = {
       timestamp,
       isPinned: false,
-      stats: this.analyzeTree(tree),
+      stats: analyzeTree(tree),
       tree,
     };
 
@@ -273,43 +271,7 @@ export default class BookmarkManager extends HTMLElement {
     }
   }
 
-  // Helper to analyze tree statistics
-  analyzeTree(nodes: chrome.bookmarks.BookmarkTreeNode[]): BookmarkSnapshotStats {
-    let bookmarks = 0;
-    let folders = 0;
-    let maxDepth = 0;
-    let totalBookmarkDepth = 0;
 
-    const traverse = (node: chrome.bookmarks.BookmarkTreeNode, depth: number) => {
-      // Adjust depth so Bookmarks Bar contents (depth 2) are depth 0.
-      // Root (0) -> Bar (1) -> Content (2) => 0
-      const relativeDepth = Math.max(0, depth - 2);
-
-      if (relativeDepth > maxDepth) maxDepth = relativeDepth;
-
-      if (node.url) {
-        bookmarks++;
-        totalBookmarkDepth += relativeDepth;
-      } else {
-        folders++;
-      }
-
-      if (node.children) {
-        for (const child of node.children) {
-          traverse(child, depth + 1);
-        }
-      }
-    };
-
-    // Start traversal for each top-level node (usually 'root')
-    for (const node of nodes) {
-      traverse(node, 0);
-    }
-
-    const avgDepth = bookmarks > 0 ? totalBookmarkDepth / bookmarks : 0;
-
-    return { bookmarks, folders, maxDepth, avgDepth };
-  }
 }
 
 customElements.define("bookmark-manager", BookmarkManager);
