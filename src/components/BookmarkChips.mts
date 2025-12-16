@@ -3,6 +3,7 @@ import BookmarkSearchBar from "./BookmarkSearchBar.mjs";
 
 export default class BookmarkChips extends HTMLElement {
   searchInput: BookmarkSearchBar | null = null;
+  isCtrlPressed: boolean = false;
   
   constructor() {
     super();
@@ -24,6 +25,10 @@ export default class BookmarkChips extends HTMLElement {
     } else {
         console.error("BookmarkSearchBar not found or not ready");
     }
+    
+    // listen for ctrl key to handle link opening behavior (prevent popup losing focus)
+    window.addEventListener('keydown', (e) => e.key === 'Control' ? this.isCtrlPressed = true : null);
+    window.addEventListener('keyup', (e) => e.key === 'Control' ? this.isCtrlPressed = false : null);
 
     this.handleNullQuery();
   }
@@ -78,10 +83,14 @@ export default class BookmarkChips extends HTMLElement {
     
     chip.setAttribute('href', node.url || '');
     
+    // Fix for popup losing focus when when a link is clicked, and local urls not working
     chip.addEventListener('click', (e) => {
       e.preventDefault();
       if (node.url) {
-        chrome.tabs.create({ url: node.url });
+        chrome.tabs.create({ 
+          url: node.url, 
+          active: !this.isCtrlPressed
+        });
       }
     });
 
