@@ -102,6 +102,7 @@ a {
     outline-offset: -1px;
     outline-style: solid;
     outline-color: black;
+    z-index: 1;
   }
 }
 

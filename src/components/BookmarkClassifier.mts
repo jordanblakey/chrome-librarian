@@ -20,8 +20,10 @@ export default class BookmarkClassifier extends HTMLElement {
     }
 
     connectedCallback() {
-        this.render();
-        this.bindEvents();
+        if (!this.shadowRoot!.querySelector(".bookmark-classifier")) {
+            this.render();
+            this.bindEvents();
+        }
     }
 
     private render() {
