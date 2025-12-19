@@ -23,3 +23,5 @@ feature: improve generated classifications by doing this in batches:
   this can fix the context size limitation for the Prompt
 ux: It's cool to see the classification progress in the UI. But why not automatically proceed through the steps, requiring only one click?
 ux: Should not be able to restart the step after pressing it once without clearing the data first (button should turn yellow or green)
+
+ux: The last minted snapshot should be highlighted in the UI, visually it gets lost under pinned snapshots. Pinned could be light blue, newest could be green.
