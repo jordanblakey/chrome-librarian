@@ -1,6 +1,64 @@
 # Chrome Librarian
 
-## Documentation Links
+A Chrome extension that leverages **Gemini Nano** to intelligently organize, classify, and manage your bookmarks.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js**: v20 or higher recommended.
+- **Chrome Canary**: (Optional but recommended) Required for experimental AI features like Gemini Nano.
+
+### Installation
+
+1.  Clone the repository.
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+3.  Build the project and start the development server:
+    ```bash
+    npm run dev
+    ```
+
+### Loading the Extension
+
+1.  Open Chrome and navigate to `chrome://extensions`.
+2.  Enable **Developer mode** (toggle in the top right).
+3.  Click **Load unpacked**.
+4.  Select the `dist` directory created in your project folder.
+
+## 🏗️ Project Structure
+
+- **`src/background.mts`**: The service worker handling background tasks and extension events.
+- **`src/popup.mts`**: Logic for the extension popup (the small window when you click the icon).
+- **`src/options.mts`**: Logic for the full-page options/settings UI.
+- **`src/components/`**: Reusable UI components (Web Components/custom elements).
+- **`src/assets/`**: Static resources like CSS, HTML, and icons.
+- **`src/utils/`**: Helper utilities for storage, classification, and more.
+- **`scripts/`**: Build and development scripts (using `ts-node`).
+
+## 🛠️ Development
+
+### Scripts
+
+- **`npm run dev`**: Starts the development server with hot reloading.
+- **`npm run build`**: Builds the extension for production into the `dist` folder.
+- **`npm test`**: Runs unit tests using Vitest.
+- **`npm run test:watch`**: Runs tests in watch mode.
+
+### Hot Reloading
+
+When running `npm run dev`:
+
+-   **UI Changes** (e.g., `options.ts`, `popup.html`): The page refreshes automatically.
+-   **System Changes** (e.g., `background.ts`, `manifest.json`): The extension reloads completely.
+
+> [!NOTE]
+> If you add a new entry point (e.g., a new content script), you must manually add it to the `ENTRY_POINTS` array in `scripts/build.ts` so the hot-reload client can be injected.
+
+## 📚 Documentation Links
 
 ### Chrome APIs
 - <https://developer.chrome.com/docs/extensions/reference/manifest>
@@ -27,16 +85,3 @@
 
 ### Gemini API
 - <https://ai.google.dev/gemini-api/docs/tokens?lang=node>
-
-## Development
-
-### Hot Reloading
-
-Run `npm run dev` to start the development server. This will watch for file changes and automatically rebuild the extension.
-
-- **Smart Reload**:
-    - **UI Changes** (e.g., `options.ts`, `popup.html`): The page will refresh automatically without closing.
-    - **System Changes** (e.g., `background.ts`, `manifest.json`): The extension will reload completely (closing any open extension pages).
-
-> [!NOTE]
-> If you add a new entry point (e.g., a new content script), you must manually add it to the `ENTRY_POINTS` array in `scripts/build.ts` so the hot-reload client can be injected.
